@@ -8,3 +8,4 @@ ubuntu:24.04
 ubuntu:20.04
 ubuntu:22.04
 golang:1.19
+docker.io/nvidia/cuda:11.8.0-devel-ubuntu22.04
