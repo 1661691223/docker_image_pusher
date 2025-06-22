@@ -6,4 +6,5 @@
 #--platform=linux/arm64 xiaoyaliu/alist
 #nvidia/cuda:12.3.2-base-ubuntu22.04
 #alpine:latest
-abesesr/ncdu-web-viewer:1.0.0
+#abesesr/ncdu-web-viewer:1.0.0
+open-webui:latest
