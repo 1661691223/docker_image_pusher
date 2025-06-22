@@ -7,4 +7,5 @@
 #nvidia/cuda:12.3.2-base-ubuntu22.04
 #alpine:latest
 #abesesr/ncdu-web-viewer:1.0.0
-open-webui:latest
+node:22-alpine3.20
+python:3.11-slim-bookworm
