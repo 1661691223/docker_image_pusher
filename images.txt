@@ -9,4 +9,5 @@
 #abesesr/ncdu-web-viewer:1.0.0
 #node:22-alpine3.20
 #python:3.11-slim-bookworm
-ubuntu:18.04
+#ubuntu:18.04
+vllm/vllm-openai:latest
