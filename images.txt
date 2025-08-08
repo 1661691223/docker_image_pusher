@@ -11,4 +11,5 @@
 #python:3.11-slim-bookworm
 #ubuntu:18.04
 #vllm/vllm-openai:latest
-vllm/vllm-openai:gptoss
+#vllm/vllm-openai:gptoss
+nvidia/cuda:12.6.1-cudnn-devel-ubuntu22.04
