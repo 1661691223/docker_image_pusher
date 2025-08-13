@@ -13,4 +13,5 @@
 #vllm/vllm-openai:latest
 #vllm/vllm-openai:gptoss
 #nvidia/cuda:12.6.1-cudnn-devel-ubuntu22.04
-lmsysorg/sglang:v0.5.0rc0-cu126
+#lmsysorg/sglang:v0.5.0rc0-cu126
+nginx:latest
