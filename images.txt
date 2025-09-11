@@ -22,4 +22,5 @@
 #lmsysorg/sglang:v0.5.1.post2-cann8.2.rc1-a3
 #vllm/vllm-openai:v0.9.0
 #lmsysorg/sglang:v0.5.1.post3-cu126
-jc21/nginx-proxy-manager:2.12.1
+#jc21/nginx-proxy-manager:2.12.1
+lmsysorg/sglang:v0.4.6.post5-cu124
