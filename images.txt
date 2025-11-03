@@ -24,4 +24,5 @@
 #lmsysorg/sglang:v0.5.1.post3-cu126
 #jc21/nginx-proxy-manager:2.12.1
 #lmsysorg/sglang:v0.4.6.post5-cu124
-quay.io/minio/minio
+#quay.io/minio/minio
+vllm/vllm-openai:v0.11.0
