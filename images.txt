@@ -25,4 +25,5 @@
 #jc21/nginx-proxy-manager:2.12.1
 #lmsysorg/sglang:v0.4.6.post5-cu124
 #quay.io/minio/minio
-vllm/vllm-openai:v0.11.0
+#vllm/vllm-openai:v0.11.0
+chenshawn6915/multimodal-ipython-sandbox:latest
