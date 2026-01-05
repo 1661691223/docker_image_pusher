@@ -28,4 +28,5 @@
 #vllm/vllm-openai:v0.11.0
 #chenshawn6915/multimodal-ipython-sandbox:latest
 #lmsysorg/sglang:v0.5.6.post2
-vllm/vllm-openai:v0.10.1
+#vllm/vllm-openai:v0.10.1
+nvcr.io/nvidia/nemo-curator:25.09
