@@ -30,4 +30,5 @@
 #lmsysorg/sglang:v0.5.6.post2
 #vllm/vllm-openai:v0.10.1
 #nvcr.io/nvidia/nemo-curator:25.09
-ghcr.io/nuprl/multipl-e-evaluation:latest
+#ghcr.io/nuprl/multipl-e-evaluation:latest
+lmsysorg/sglang:v0.5.9
