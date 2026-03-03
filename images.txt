@@ -32,4 +32,5 @@
 #nvcr.io/nvidia/nemo-curator:25.09
 #ghcr.io/nuprl/multipl-e-evaluation:latest
 #lmsysorg/sglang:v0.5.9
-node:22-bookworm
+#node:22-bookworm
+alpine/openclaw:2026.3.1
