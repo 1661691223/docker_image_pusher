@@ -33,4 +33,5 @@
 #ghcr.io/nuprl/multipl-e-evaluation:latest
 #lmsysorg/sglang:v0.5.9
 #node:22-bookworm
-alpine/openclaw:2026.3.1
+#alpine/openclaw:2026.3.1
+nicolaka/netshoot
