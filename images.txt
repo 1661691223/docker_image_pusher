@@ -34,4 +34,5 @@
 #lmsysorg/sglang:v0.5.9
 #node:22-bookworm
 #alpine/openclaw:2026.3.1
-nicolaka/netshoot
+#nicolaka/netshoot
+lmsysorg/sglang:nightly-dev-20260311-dc4380e3
