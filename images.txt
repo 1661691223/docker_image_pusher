@@ -35,4 +35,5 @@
 #node:22-bookworm
 #alpine/openclaw:2026.3.1
 #nicolaka/netshoot
-lmsysorg/sglang:nightly-dev-20260311-dc4380e3
+#lmsysorg/sglang:nightly-dev-20260311-dc4380e3
+vllm/vllm-openai:v0.17.1
