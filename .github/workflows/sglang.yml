@@ -1,0 +1,77 @@
+name: Sync SGLang Multiple Tags
+
+on:
+  schedule:
+    - cron: '0 2 * * *' # 每天凌晨2点运行
+  workflow_dispatch:    # 支持手动触发
+
+env:
+  ACR_REGISTRY: "${{ secrets.ACR_REGISTRY }}"
+  ACR_NAMESPACE: "${{ secrets.ACR_NAMESPACE }}"
+  SOURCE_REPO: "lmsysorg/sglang"
+
+jobs:
+  sync-tags:
+    runs-on: ubuntu-latest
+    steps:
+      # --- 修改后的前置处理：极限清理磁盘空间 ---
+      # 这是目前所有主流 docker_image_pusher 标配的前置动作
+      - name: Maximize Build Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          # 保留必要的工具链，清理掉所有占空间的冗余环境
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Login to ACR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.ACR_REGISTRY }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
+
+      # --- 保持现有的 Tag 获取和循环处理逻辑 ---
+      - name: Fetch Tags and Sync
+        run: |
+          # 1. 获取最近的 5 个 tag (排除 latest 和带有 sha256 的指纹标签)
+          TAGS=$(curl -s "https://hub.docker.com/v2/repositories/${{ env.SOURCE_REPO }}/tags?page_size=20" | \
+            jq -r '.results[] | select(.name != "latest" and (.name | contains("sha256") | not)) | .name' | head -n 5)
+          
+          echo "Found tags to sync: $TAGS"
+
+          # 2. 开始串行循环
+          for TAG in $TAGS; do
+            SOURCE_IMAGE="${{ env.SOURCE_REPO }}:$TAG"
+            TARGET_IMAGE="${{ env.ACR_REGISTRY }}/${{ env.ACR_NAMESPACE }}/sglang:$TAG"
+            
+            echo "------------------------------------------"
+            echo "Processing: $SOURCE_IMAGE"
+            echo "------------------------------------------"
+
+            # 3. 核心同步逻辑：拉取 -> 打标 -> 推送
+            if docker pull $SOURCE_IMAGE; then
+              docker tag $SOURCE_IMAGE $TARGET_IMAGE
+              docker push $TARGET_IMAGE
+              echo "Successfully synced $TAG"
+            else
+              echo "Failed to pull $SOURCE_IMAGE, skipping..."
+              continue
+            fi
+
+            # 4. 单次循环结束后的后置处理：立即销毁本地缓存释放空间
+            docker rmi -f $SOURCE_IMAGE $TARGET_IMAGE
+            docker system prune -f
+            
+            # 打印当前磁盘剩余空间状态
+            df -h /
+          done
+
+      - name: Final Cleanup
+        if: always()
+        run: |
+          docker system prune -a -f
