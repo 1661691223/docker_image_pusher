@@ -6,8 +6,8 @@ on:
   workflow_dispatch:    # 支持手动触发
 
 env:
-  ACR_REGISTRY: "${{ secrets.ACR_REGISTRY }}"
-  ACR_NAMESPACE: "${{ secrets.ACR_NAMESPACE }}"
+  ACR_REGISTRY: "${{ secrets.ALIYUN_REGISTRY }}"
+  ACR_NAMESPACE: "${{ secrets.ALIYUN_NAME_SPACE }}"
   SOURCE_REPO: "lmsysorg/sglang"
 
 jobs:
@@ -32,8 +32,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ${{ env.ACR_REGISTRY }}
-          username: ${{ secrets.ACR_USERNAME }}
-          password: ${{ secrets.ACR_PASSWORD }}
+          username: ${{ secrets.ALIYUN_REGISTRY_USER }}
+          password: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
 
       # --- 保持现有的 Tag 获取和循环处理逻辑 ---
       - name: Fetch Tags and Sync
