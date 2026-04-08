@@ -37,4 +37,5 @@
 #nicolaka/netshoot
 #lmsysorg/sglang:nightly-dev-20260311-dc4380e3
 #vllm/vllm-openai:v0.17.1
-lmsysorg/sglang:nightly-dev-20260321-94194537
+#lmsysorg/sglang:nightly-dev-20260321-94194537
+lmsysorg/sglang:gemma4
