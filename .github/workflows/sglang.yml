@@ -45,13 +45,13 @@ jobs:
           # 4. grep -v "main" : 模糊匹配，删除任何包含 "main" 的行
           # 5. grep -v "sha256" : 排除自动生成的指纹标签
           
-          TAGS=$(curl -s "https://hub.docker.com/v2/repositories/${{ env.SOURCE_REPO }}/tags?page_size=30" | \
+          TAGS=$(curl -s "https://hub.docker.com/v2/repositories/${{ env.SOURCE_REPO }}/tags?page_size=50" | \
             jq -r '.results[] | .name' | \
             grep -vx "dev" | \
             grep -vx "latest" | \
             grep -v "main" | \
             grep -v "sha256" | \
-            head -n 5)
+            head -n 30)
           
           echo "Checked and filtered tags: $TAGS"
 
