@@ -39,4 +39,5 @@
 #vllm/vllm-openai:v0.17.1
 #lmsysorg/sglang:nightly-dev-20260321-94194537
 #lmsysorg/sglang:gemma4
-lmsysorg/sglang:v0.5.10.post1
+#lmsysorg/sglang:v0.5.10.post1
+justlikemaki/aiclient-2-api:2.13.7
