@@ -84,6 +84,7 @@ jobs:
           ALIYUN_NAME_SPACE: ${{ secrets.ALIYUN_NAME_SPACE }}
           PAGE_MASTER_PASSWORD: ${{ secrets.PAGE_MASTER_PASSWORD }}
           PAGE_USERS: ${{ secrets.PAGE_USERS }}
+          PAGE_SESSION_DAYS: ${{ secrets.PAGE_SESSION_DAYS }}
         run: |
           chmod +x scripts/generate_page.sh
           bash scripts/generate_page.sh

@@ -3,7 +3,7 @@
 # 安全特性：
 # - 密码哈希: PBKDF2(password, user_hash_salt, 100000)
 # - 数据加密: AES-256-GCM with PBKDF2-derived key
-# - 每用户独立 salt，无哈希可比对
+# - 会话持久化: localStorage 加密存储 + 过期时间
 
 set -euo pipefail
 
@@ -20,6 +20,7 @@ REGISTRY="${ALIYUN_REGISTRY:-registry.cn-hangzhou.aliyuncs.com}"
 NAMESPACE="${ALIYUN_NAME_SPACE:-}"
 MASTER_PASSWORD="${PAGE_MASTER_PASSWORD:-}"
 USERS_CONFIG="${PAGE_USERS:-}"
+SESSION_DAYS="${PAGE_SESSION_DAYS:-3}"
 
 if [ ! -f "$VERSIONS_FILE" ]; then
     VERSIONS_JSON='{"images":[],"last_updated":""}'
@@ -128,32 +129,39 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
     </div>
     <script>
         const CFG = __ENCRYPTED_JSON__;
+        const SESSION_DAYS = __SESSION_DAYS__;
         let D = null;
 
-        // Base64 helpers
+        // ========== Crypto Helpers ==========
         function b64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
         function hex(buf){return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')}
+        function randB64(n){const a=new Uint8Array(n);crypto.getRandomValues(a);return btoa(String.fromCharCode(...a))}
 
-        // PBKDF2 key derivation
+        // PBKDF2: returns hex hash or CryptoKey
         async function pbkdf2(pw, salt, usage){
-            const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
-            const bits = await crypto.subtle.deriveBits(
-                {name:'PBKDF2', salt:b64(salt), iterations:100000, hash:'SHA-256'},
-                km, 256
-            );
-            if(usage === 'hash') return hex(bits);
-            // For encryption, convert to CryptoKey
-            return crypto.subtle.importKey('raw', bits, 'AES-GCM', false, ['decrypt']);
+            const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits','deriveKey']);
+            if(usage === 'hash'){
+                const bits = await crypto.subtle.deriveBits({name:'PBKDF2',salt:b64(salt),iterations:100000,hash:'SHA-256'}, km, 256);
+                return hex(bits);
+            }
+            return crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(salt),iterations:100000,hash:'SHA-256'}, km, {name:'AES-GCM',length:256}, false, ['encrypt','decrypt']);
         }
 
-        // AES-GCM decryption
+        // AES decrypt with CryptoKey
         async function aesDecrypt(key, iv, ct){
             try {
-                const dec = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64(iv)}, key, b64(ct));
+                const dec = await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(iv)}, key, b64(ct));
                 return new TextDecoder().decode(dec);
             } catch { return null; }
         }
 
+        // AES encrypt with CryptoKey
+        async function aesEncrypt(key, iv, data){
+            const enc = await crypto.subtle.encrypt({name:'AES-GCM',iv:b64(iv)}, key, new TextEncoder().encode(data));
+            return btoa(String.fromCharCode(...new Uint8Array(enc)));
+        }
+
+        // ========== Login ==========
         async function login(){
             const u = document.getElementById('user').value.trim();
             const p = document.getElementById('pass').value;
@@ -166,68 +174,119 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
             btn.textContent = 'Verifying...';
             btn.disabled = true;
 
-            // Step 1: Verify password hash (PBKDF2 with hash_salt)
+            // 1. Verify password hash
             const hash = await pbkdf2(p, udata.hash_salt, 'hash');
             if(hash !== udata.hash){
-                btn.textContent = 'Login';
-                btn.disabled = false;
-                show('Invalid username or password');
-                return;
+                btn.textContent = 'Login'; btn.disabled = false;
+                show('Invalid username or password'); return;
             }
 
-            // Step 2: Decrypt master key (PBKDF2 with enc_salt)
+            // 2. Decrypt master key
             const encKey = await pbkdf2(p, udata.enc_salt, 'decrypt');
             const mk = await aesDecrypt(encKey, udata.iv, udata.mk);
             if(!mk){
-                btn.textContent = 'Login';
-                btn.disabled = false;
-                show('Decryption error');
-                return;
+                btn.textContent = 'Login'; btn.disabled = false;
+                show('Decryption error'); return;
             }
 
-            // Step 3: Decrypt data with master key
+            // 3. Decrypt data
             const mkKey = await pbkdf2(mk, CFG.salt, 'decrypt');
             const raw = await aesDecrypt(mkKey, CFG.iv, CFG.data);
             if(!raw){
-                btn.textContent = 'Login';
-                btn.disabled = false;
-                show('Data error');
-                return;
+                btn.textContent = 'Login'; btn.disabled = false;
+                show('Data error'); return;
             }
 
             D = JSON.parse(raw);
 
-            // Save master key for session persistence
-            sessionStorage.setItem('mk', mk);
-            sessionStorage.setItem('u', u);
+            // 4. Save session to localStorage
+            await saveSession(u, mk);
 
-            btn.textContent = 'Login';
-            btn.disabled = false;
-            ok(u);
+            btn.textContent = 'Login'; btn.disabled = false;
+            showMain(u);
         }
 
-        // Auto-decrypt on page load if master key exists
-        async function autoDecrypt(){
-            const mk = sessionStorage.getItem('mk');
-            const u = sessionStorage.getItem('u');
-            if(!mk || !u) return false;
+        // ========== Session Management ==========
+        async function getDeviceKey(){
+            let secret = localStorage.getItem('ds');
+            if(!secret){
+                secret = randB64(32);
+                localStorage.setItem('ds', secret);
+            }
+            // Derive encryption key from device secret
+            const km = await crypto.subtle.importKey('raw', b64(secret), {name:'HKDF'}, false, ['deriveKey']);
+            return crypto.subtle.deriveKey(
+                {name:'HKDF', salt:new TextEncoder().encode('dreg-session'), info:new TextEncoder().encode('aes-key'), hash:'SHA-256'},
+                km, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']
+            );
+        }
 
-            const mkKey = await pbkdf2(mk, CFG.salt, 'decrypt');
-            const raw = await aesDecrypt(mkKey, CFG.iv, CFG.data);
-            if(!raw){
-                sessionStorage.removeItem('mk');
+        async function saveSession(username, masterKey){
+            const dkey = await getDeviceKey();
+            const iv = randB64(12);
+            const encMk = await aesEncrypt(dkey, iv, masterKey);
+
+            localStorage.setItem('sess', JSON.stringify({
+                u: username,
+                mk: encMk,
+                iv: iv,
+                ts: Date.now()
+            }));
+        }
+
+        async function tryRestore(){
+            const raw = localStorage.getItem('sess');
+            if(!raw) return false;
+
+            const sess = JSON.parse(raw);
+            const age = (Date.now() - sess.ts) / 86400000; // days
+
+            if(age > SESSION_DAYS){
+                localStorage.removeItem('sess');
                 return false;
             }
 
-            D = JSON.parse(raw);
-            return true;
+            try {
+                const dkey = await getDeviceKey();
+                const mk = await aesDecrypt(dkey, sess.iv, sess.mk);
+                if(!mk) return false;
+
+                const mkKey = await pbkdf2(mk, CFG.salt, 'decrypt');
+                const data = await aesDecrypt(mkKey, CFG.iv, CFG.data);
+                if(!data) return false;
+
+                D = JSON.parse(data);
+                return sess.u;
+            } catch {
+                localStorage.removeItem('sess');
+                return false;
+            }
         }
 
-        function ok(u){sessionStorage.setItem('u',u);document.getElementById('overlay').classList.add('hidden');document.getElementById('main').classList.remove('hidden');document.getElementById('cur').textContent=u;render()}
-        function logout(){sessionStorage.clear();D=null;document.getElementById('overlay').classList.remove('hidden');document.getElementById('main').classList.add('hidden');document.getElementById('loginForm').reset();}
-        function show(m){const e=document.getElementById('err');e.textContent=m;e.style.display='block';setTimeout(()=>e.style.display='none',3000)}
+        // ========== UI ==========
+        function showMain(u){
+            document.getElementById('overlay').classList.add('hidden');
+            document.getElementById('main').classList.remove('hidden');
+            document.getElementById('cur').textContent = u;
+            render();
+        }
 
-        let cf='all',cs={k:'build_time',a:false};
+        function logout(){
+            localStorage.removeItem('sess');
+            D = null;
+            document.getElementById('overlay').classList.remove('hidden');
+            document.getElementById('main').classList.add('hidden');
+            document.getElementById('loginForm').reset();
+        }
+
+        function show(m){
+            const e = document.getElementById('err');
+            e.textContent = m; e.style.display = 'block';
+            setTimeout(() => e.style.display = 'none', 3000);
+        }
+
+        // ========== Table ==========
+        let cf='all', cs={k:'build_time',a:false};
         function filt(f){cf=f;document.querySelectorAll('.fb').forEach(b=>b.classList.toggle('active',b.dataset.f===f));render()}
         function sort(k){if(cs.k===k)cs.a=!cs.a;else{cs.k=k;cs.a=true}render()}
         function imgs(){
@@ -250,16 +309,20 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
         }
         function e(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
         function cp(el){navigator.clipboard.writeText(el.textContent).then(()=>{el.classList.add('ok');const o=el.textContent;el.textContent='✓ Copied!';setTimeout(()=>{el.textContent=o;el.classList.remove('ok')},1500)})}
+
+        // ========== Init ==========
         document.addEventListener('DOMContentLoaded', async ()=>{
-            // Try auto-login with saved master key
-            if(await autoDecrypt()){
-                const u = sessionStorage.getItem('u');
-                document.getElementById('overlay').classList.add('hidden');
-                document.getElementById('main').classList.remove('hidden');
-                document.getElementById('cur').textContent = u;
-                render();
-            }
-            document.getElementById('q').addEventListener('input',render);
+            // Try auto-login
+            const u = await tryRestore();
+            if(u) showMain(u);
+
+            document.getElementById('q').addEventListener('input', render);
+            document.getElementById('user').value = localStorage.getItem('lastUser') || '';
+
+            // Save username on input
+            document.getElementById('user').addEventListener('change', e => {
+                localStorage.setItem('lastUser', e.target.value);
+            });
         });
     </script>
 </body>
@@ -267,7 +330,7 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
 HTMLEOF
 
 python3 << PYEOF
-import json, os, secrets, hashlib, base64
+import json, os, secrets, base64
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 from cryptography.hazmat.primitives import hashes
@@ -278,6 +341,7 @@ REGISTRY = "$REGISTRY"
 NAMESPACE = "$NAMESPACE"
 MASTER_PASSWORD = "$MASTER_PASSWORD"
 USERS_CONFIG = "$USERS_CONFIG"
+SESSION_DAYS = "$SESSION_DAYS"
 
 with open(VERSIONS_FILE, 'r') as f:
     versions = json.load(f)
@@ -285,7 +349,7 @@ with open(VERSIONS_FILE, 'r') as f:
 with open(OUTPUT_FILE, 'r') as f:
     html = f.read()
 
-# Master data to encrypt
+# Master data
 master_data = {
     "images": versions.get("images", []),
     "last_updated": versions.get("last_updated", ""),
@@ -293,49 +357,43 @@ master_data = {
     "namespace": NAMESPACE
 }
 
-# Generate master encryption key
+# Encrypt master data
 master_salt = secrets.token_bytes(16)
 master_iv = secrets.token_bytes(12)
 master_kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=master_salt, iterations=100000)
 master_key = master_kdf.derive(MASTER_PASSWORD.encode())
+data_ct = AESGCM(master_key).encrypt(master_iv, json.dumps(master_data, ensure_ascii=False).encode(), None)
 
-# Encrypt master data
-data_aes = AESGCM(master_key)
-data_ct = data_aes.encrypt(master_iv, json.dumps(master_data, ensure_ascii=False).encode(), None)
-
-# Build users with separate salts for hash and encryption
+# Build users
 users_out = {}
 if USERS_CONFIG:
     for pair in USERS_CONFIG.split(','):
         pair = pair.strip()
-        if ':' not in pair:
-            continue
+        if ':' not in pair: continue
         uname, pwd = pair.split(':', 1)
         uname, pwd = uname.strip(), pwd.strip()
 
-        # 1. Generate hash: PBKDF2(password, hash_salt, 100000) -> hex
+        # Hash: PBKDF2(password, hash_salt, 100000)
         hash_salt = secrets.token_bytes(16)
         hash_kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=hash_salt, iterations=100000)
-        pwd_hash = hash_kdf.derive(pwd.encode())
-        pwd_hash_hex = pwd_hash.hex()
+        pwd_hash = hash_kdf.derive(pwd.encode()).hex()
 
-        # 2. Encrypt master key with user's password (separate salt!)
+        # Encrypt master key with user password
         enc_salt = secrets.token_bytes(16)
         enc_iv = secrets.token_bytes(12)
         enc_kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=enc_salt, iterations=100000)
         enc_key = enc_kdf.derive(pwd.encode())
-        enc_aes = AESGCM(enc_key)
-        mk_ct = enc_aes.encrypt(enc_iv, MASTER_PASSWORD.encode(), None)
+        mk_ct = AESGCM(enc_key).encrypt(enc_iv, MASTER_PASSWORD.encode(), None)
 
         users_out[uname] = {
             "hash_salt": base64.b64encode(hash_salt).decode(),
-            "hash": pwd_hash_hex,
+            "hash": pwd_hash,
             "enc_salt": base64.b64encode(enc_salt).decode(),
             "iv": base64.b64encode(enc_iv).decode(),
             "mk": base64.b64encode(mk_ct).decode()
         }
 
-# Final encrypted config
+# Final config
 encrypted = {
     "salt": base64.b64encode(master_salt).decode(),
     "iv": base64.b64encode(master_iv).decode(),
@@ -344,6 +402,7 @@ encrypted = {
 }
 
 html = html.replace('__ENCRYPTED_JSON__', json.dumps(encrypted))
+html = html.replace('__SESSION_DAYS__', SESSION_DAYS)
 
 with open(OUTPUT_FILE, 'w') as f:
     f.write(html)
@@ -351,8 +410,7 @@ with open(OUTPUT_FILE, 'w') as f:
 print("Done!")
 print(f"  Users: {list(users_out.keys())}")
 print(f"  Images: {len(master_data['images'])}")
-print(f"  Hash: PBKDF2-SHA256-100k with per-user salt")
-print(f"  Encryption: AES-256-GCM with PBKDF2-derived key")
+print(f"  Session: {SESSION_DAYS} days")
 PYEOF
 
 echo "Page generated: $OUTPUT_FILE"
