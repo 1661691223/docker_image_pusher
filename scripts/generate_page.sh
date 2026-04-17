@@ -1,8 +1,8 @@
 #!/bin/bash
-# generate_page.sh - 生成 GitHub Pages HTML 页面（AES-GCM 加密用户配置）
+# generate_page.sh - 生成 GitHub Pages HTML 页面（全数据 AES-256-GCM 加密）
 # 用法: ./generate_page.sh
 # 环境变量:
-#   PAGE_MASTER_PASSWORD - 主密码（用于加密用户配置）
+#   PAGE_MASTER_PASSWORD - 主密码（加密所有数据）
 #   PAGE_USERS - 用户配置，格式: "user1:password1,user2:password2"
 #   ALIYUN_REGISTRY - 阿里云仓库地址
 #   ALIYUN_NAME_SPACE - 阿里云命名空间
@@ -18,13 +18,11 @@ OUTPUT_FILE="$OUTPUT_DIR/index.html"
 
 mkdir -p "$OUTPUT_DIR"
 
-# 默认值
 REGISTRY="${ALIYUN_REGISTRY:-registry.cn-hangzhou.aliyuncs.com}"
 NAMESPACE="${ALIYUN_NAME_SPACE:-}"
 MASTER_PASSWORD="${PAGE_MASTER_PASSWORD:-}"
 USERS_CONFIG="${PAGE_USERS:-}"
 
-# 读取版本数据
 if [ ! -f "$VERSIONS_FILE" ]; then
     echo "WARNING: $VERSIONS_FILE not found, creating empty page"
     VERSIONS_JSON='{"images":[],"last_updated":""}'
@@ -32,7 +30,6 @@ else
     VERSIONS_JSON=$(cat "$VERSIONS_FILE")
 fi
 
-# 生成页面 HTML
 cat > "$OUTPUT_FILE" << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -51,7 +48,7 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
         .login-overlay {
             position: fixed;
             top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.9);
+            background: #0d1117;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -115,25 +112,6 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
             font-size: 14px;
             display: none;
         }
-        .login-hint {
-            color: #8b949e;
-            text-align: center;
-            margin-top: 16px;
-            font-size: 12px;
-        }
-        .step-indicator {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-        .step-dot {
-            width: 8px; height: 8px;
-            border-radius: 50%;
-            background: #30363d;
-        }
-        .step-dot.active { background: #58a6ff; }
-        .step-dot.done { background: #238636; }
         .header {
             background: #161b22;
             border-bottom: 1px solid #30363d;
@@ -308,36 +286,15 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
     </style>
 </head>
 <body>
-    <!-- Login Overlay -->
+    <!-- Login -->
     <div id="loginOverlay" class="login-overlay">
         <div class="login-box">
             <h2>🐳 Docker Registry</h2>
-
-            <!-- Step 1: Master Password -->
-            <div id="stepMaster">
-                <div class="step-indicator">
-                    <div class="step-dot active"></div>
-                    <div class="step-dot"></div>
-                </div>
-                <p>Enter master password to unlock</p>
-                <input type="password" id="masterPassword" placeholder="Master Password" autocomplete="off">
-                <button id="unlockBtn" onclick="unlock()">Unlock</button>
-                <div id="masterError" class="login-error"></div>
-                <div class="login-hint">Master password is configured by admin in GitHub Secrets</div>
-            </div>
-
-            <!-- Step 2: User Login -->
-            <div id="stepUser" class="hidden">
-                <div class="step-indicator">
-                    <div class="step-dot done"></div>
-                    <div class="step-dot active"></div>
-                </div>
-                <p>Login with your credentials</p>
-                <input type="text" id="username" placeholder="Username" autocomplete="username">
-                <input type="password" id="password" placeholder="Password" autocomplete="current-password">
-                <button onclick="doLogin()">Login</button>
-                <div id="loginError" class="login-error"></div>
-            </div>
+            <p>Enter password to unlock</p>
+            <input type="text" id="username" placeholder="Username" autocomplete="username">
+            <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+            <button id="loginBtn" onclick="doLogin()">Login</button>
+            <div id="loginError" class="login-error"></div>
         </div>
     </div>
 
@@ -396,128 +353,98 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
     </div>
 
     <script>
-        // ============ ENCRYPTED CONFIG ============
-        // Data is encrypted at build time with AES-256-GCM
-        // Decrypted at runtime using the master password
-        const ENCRYPTED_CONFIG = {
+        // ============ ENCRYPTED DATA ============
+        const ENCRYPTED = {
             salt: "__SALT_B64__",
             iv: "__IV_B64__",
-            ciphertext: "__CIPHERTEXT_B64__"
+            data: "__DATA_B64__"
         };
 
-        // Registry configuration (not sensitive)
-        const REGISTRY = "__REGISTRY__";
-        const NAMESPACE = "__NAMESPACE__";
-
-        // Version data (not sensitive)
-        const VERSION_DATA = __VERSIONS_JSON__;
-
         // ============ CRYPTO ============
-        let decryptedUsers = null;
+        let appData = null;
+
+        function b64ToBuf(b64) {
+            const bin = atob(b64);
+            const buf = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) buf[i] = bin.charCodeAt(i);
+            return buf.buffer;
+        }
 
         async function deriveKey(password, salt) {
             const enc = new TextEncoder();
-            const keyMaterial = await crypto.subtle.importKey(
-                'raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']
-            );
+            const km = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']);
             return crypto.subtle.deriveKey(
-                { name: 'PBKDF2', salt: salt, iterations: 100000, hash: 'SHA-256' },
-                keyMaterial,
-                { name: 'AES-GCM', length: 256 },
-                false,
-                ['decrypt']
+                { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+                km, { name: 'AES-GCM', length: 256 }, false, ['decrypt']
             );
         }
 
-        function b64ToArrayBuffer(b64) {
-            const binary = atob(b64);
-            const bytes = new Uint8Array(binary.length);
-            for (let i = 0; i < binary.length; i++) {
-                bytes[i] = binary.charCodeAt(i);
-            }
-            return bytes.buffer;
+        async function sha256(msg) {
+            const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(msg));
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
-        async function decryptConfig(password) {
+        async function decrypt(password) {
             try {
-                const salt = b64ToArrayBuffer(ENCRYPTED_CONFIG.salt);
-                const iv = b64ToArrayBuffer(ENCRYPTED_CONFIG.iv);
-                const ciphertext = b64ToArrayBuffer(ENCRYPTED_CONFIG.ciphertext);
-
+                const salt = b64ToBuf(ENCRYPTED.salt);
+                const iv = b64ToBuf(ENCRYPTED.iv);
+                const data = b64ToBuf(ENCRYPTED.data);
                 const key = await deriveKey(password, salt);
-                const decrypted = await crypto.subtle.decrypt(
-                    { name: 'AES-GCM', iv: iv },
-                    key,
-                    ciphertext
-                );
-
-                const decoder = new TextDecoder();
-                const jsonStr = decoder.decode(decrypted);
-                return JSON.parse(jsonStr);
-            } catch (e) {
-                console.error('Decryption failed:', e);
-                return null;
-            }
+                const dec = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+                return JSON.parse(new TextDecoder().decode(dec));
+            } catch { return null; }
         }
 
-        // ============ AUTH FLOW ============
-        async function unlock() {
-            const btn = document.getElementById('unlockBtn');
-            const masterPw = document.getElementById('masterPassword').value;
-            const errorEl = document.getElementById('masterError');
-
-            if (!masterPw) {
-                showMasterError('Please enter master password');
-                return;
-            }
-
-            btn.textContent = 'Decrypting...';
-            btn.disabled = true;
-
-            const users = await decryptConfig(masterPw);
-
-            btn.textContent = 'Unlock';
-            btn.disabled = false;
-
-            if (!users || Object.keys(users).length === 0) {
-                showMasterError('Invalid master password');
-                return;
-            }
-
-            decryptedUsers = users;
-            document.getElementById('stepMaster').classList.add('hidden');
-            document.getElementById('stepUser').classList.remove('hidden');
-            document.getElementById('username').focus();
-        }
-
-        function showMasterError(msg) {
-            const el = document.getElementById('masterError');
-            el.textContent = msg;
-            el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 3000);
-        }
-
+        // ============ AUTH ============
         async function doLogin() {
+            const btn = document.getElementById('loginBtn');
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
             const errorEl = document.getElementById('loginError');
 
-            if (!username || !password) {
-                showError('Please enter username and password');
+            if (!username || !password) { showError('Please enter username and password'); return; }
+
+            btn.textContent = 'Verifying...';
+            btn.disabled = true;
+
+            // Try to decrypt with the entered password as master password
+            appData = await decrypt(password);
+
+            btn.textContent = 'Login';
+            btn.disabled = false;
+
+            if (!appData || !appData.users) {
+                showError('Invalid password');
                 return;
             }
 
-            // Compute SHA-256 of entered password and compare
-            const msgBuffer = new TextEncoder().encode(password);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-
-            if (decryptedUsers[username] && decryptedUsers[username] === hash) {
-                loginSuccess(username);
-            } else {
+            // Verify user credentials
+            const pwdHash = await sha256(password);
+            if (!appData.users[username]) {
                 showError('Invalid username or password');
+                appData = null;
+                return;
             }
+
+            // Check if stored password is a hash or plaintext
+            const stored = appData.users[username];
+            let valid = false;
+            if (stored.length === 64 && /^[a-f0-9]+$/i.test(stored)) {
+                // It's a SHA-256 hash
+                valid = (pwdHash === stored);
+            } else {
+                // It's plaintext, compute hash
+                const storedHash = await sha256(stored);
+                valid = (pwdHash === storedHash);
+            }
+
+            if (!valid) {
+                showError('Invalid username or password');
+                appData = null;
+                return;
+            }
+
+            loginSuccess(username);
         }
 
         function loginSuccess(username) {
@@ -532,12 +459,9 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
         function doLogout() {
             sessionStorage.removeItem('loggedIn');
             sessionStorage.removeItem('username');
-            decryptedUsers = null;
+            appData = null;
             document.getElementById('loginOverlay').classList.remove('hidden');
             document.getElementById('mainContent').classList.add('hidden');
-            document.getElementById('stepMaster').classList.remove('hidden');
-            document.getElementById('stepUser').classList.add('hidden');
-            document.getElementById('masterPassword').value = '';
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
         }
@@ -550,7 +474,7 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
         }
 
         function checkAuth() {
-            if (sessionStorage.getItem('loggedIn') === 'true') {
+            if (sessionStorage.getItem('loggedIn') === 'true' && appData) {
                 document.getElementById('loginOverlay').classList.add('hidden');
                 document.getElementById('mainContent').classList.remove('hidden');
                 document.getElementById('currentUser').textContent = sessionStorage.getItem('username');
@@ -561,150 +485,102 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
         let currentFilter = 'all';
         let currentSort = { key: 'build_time', asc: false };
 
-        function setFilter(filter) {
-            currentFilter = filter;
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.filter === filter);
-            });
+        function setFilter(f) {
+            currentFilter = f;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.toggle('active', b.dataset.filter === f));
             renderTable();
         }
 
         function sortBy(key) {
-            if (currentSort.key === key) {
-                currentSort.asc = !currentSort.asc;
-            } else {
-                currentSort.key = key;
-                currentSort.asc = true;
-            }
+            if (currentSort.key === key) currentSort.asc = !currentSort.asc;
+            else { currentSort.key = key; currentSort.asc = true; }
             renderTable();
         }
 
-        function getFilteredImages() {
+        function getImages() {
+            if (!appData) return [];
             const search = document.getElementById('searchBox').value.toLowerCase();
-            let images = VERSION_DATA.images || [];
+            let images = appData.images || [];
 
-            if (search) {
-                images = images.filter(img =>
-                    img.name.toLowerCase().includes(search) ||
-                    img.tag.toLowerCase().includes(search) ||
-                    (img.namespace || '').toLowerCase().includes(search) ||
-                    (img.platform || '').toLowerCase().includes(search)
-                );
-            }
+            if (search) images = images.filter(i =>
+                i.name.toLowerCase().includes(search) ||
+                i.tag.toLowerCase().includes(search) ||
+                (i.namespace||'').toLowerCase().includes(search) ||
+                (i.platform||'').toLowerCase().includes(search)
+            );
 
-            if (currentFilter !== 'all') {
-                images = images.filter(img =>
-                    (img.platform || '').toLowerCase().includes(currentFilter)
-                );
-            }
+            if (currentFilter !== 'all') images = images.filter(i =>
+                (i.platform||'').toLowerCase().includes(currentFilter)
+            );
 
             images.sort((a, b) => {
-                let va = (a[currentSort.key] || '').toLowerCase();
-                let vb = (b[currentSort.key] || '').toLowerCase();
-                if (va < vb) return currentSort.asc ? -1 : 1;
-                if (va > vb) return currentSort.asc ? 1 : -1;
-                return 0;
+                let va = (a[currentSort.key]||'').toLowerCase();
+                let vb = (b[currentSort.key]||'').toLowerCase();
+                return va < vb ? (currentSort.asc ? -1 : 1) : va > vb ? (currentSort.asc ? 1 : -1) : 0;
             });
-
             return images;
         }
 
-        function buildPullCmd(img) {
-            let platformPrefix = '';
-            if (img.platform) {
-                platformPrefix = img.platform.replace(/\//g, '_') + '_';
-            }
-
-            let nsPrefix = '';
-            const images = VERSION_DATA.images || [];
-            const sameName = images.filter(i => i.name === img.name);
-            const namespaces = [...new Set(sameName.map(i => i.namespace || ''))];
-            if (namespaces.length > 1 && img.namespace) {
-                nsPrefix = img.namespace + '_';
-            }
-
-            return `docker pull ${REGISTRY}/${NAMESPACE}/${platformPrefix}${nsPrefix}${img.name}:${img.tag}`;
+        function pullCmd(img) {
+            let pp = img.platform ? img.platform.replace(/\//g,'_')+'_' : '';
+            let np = '';
+            const all = appData.images || [];
+            const same = all.filter(i => i.name === img.name);
+            const ns = [...new Set(same.map(i => i.namespace||''))];
+            if (ns.length > 1 && img.namespace) np = img.namespace + '_';
+            return `docker pull ${appData.registry}/${appData.namespace}/${pp}${np}${img.name}:${img.tag}`;
         }
 
         function renderTable() {
-            const images = getFilteredImages();
+            const images = getImages();
             const tbody = document.getElementById('imageBody');
-            const emptyState = document.getElementById('emptyState');
+            const empty = document.getElementById('emptyState');
 
             document.getElementById('statTotal').textContent = images.length;
-            const uniqueNames = new Set(images.map(i => i.name));
-            document.getElementById('statNames').textContent = uniqueNames.size;
-            document.getElementById('statUpdated').textContent =
-                VERSION_DATA.last_updated
-                    ? new Date(VERSION_DATA.last_updated).toLocaleString('zh-CN')
-                    : '-';
+            document.getElementById('statNames').textContent = new Set(images.map(i=>i.name)).size;
+            document.getElementById('statUpdated').textContent = appData?.last_updated
+                ? new Date(appData.last_updated).toLocaleString('zh-CN') : '-';
 
-            if (images.length === 0) {
-                tbody.innerHTML = '';
-                emptyState.classList.remove('hidden');
-                return;
-            }
-            emptyState.classList.add('hidden');
+            if (!images.length) { tbody.innerHTML = ''; empty.classList.remove('hidden'); return; }
+            empty.classList.add('hidden');
 
-            tbody.innerHTML = images.map(img => {
-                const pullCmd = buildPullCmd(img);
-                const platform = img.platform || '-';
-                const buildTime = img.build_time
-                    ? new Date(img.build_time).toLocaleString('zh-CN')
-                    : '-';
+            tbody.innerHTML = images.map(i => {
+                const cmd = pullCmd(i);
+                const plat = i.platform || '-';
+                const time = i.build_time ? new Date(i.build_time).toLocaleString('zh-CN') : '-';
                 return `<tr>
-                    <td><strong>${escHtml(img.name)}</strong></td>
-                    <td>${escHtml(img.namespace || '-')}</td>
-                    <td><span class="tag">${escHtml(img.tag)}</span></td>
-                    <td>${platform !== '-' ? `<span class="platform-badge">${escHtml(platform)}</span>` : '-'}</td>
-                    <td class="time-col">${buildTime}</td>
-                    <td><code class="pull-cmd" onclick="copyCmd(this)">${escHtml(pullCmd)}</code></td>
+                    <td><strong>${esc(i.name)}</strong></td>
+                    <td>${esc(i.namespace||'-')}</td>
+                    <td><span class="tag">${esc(i.tag)}</span></td>
+                    <td>${plat!=='-'?`<span class="platform-badge">${esc(plat)}</span>`:'-'}</td>
+                    <td class="time-col">${time}</td>
+                    <td><code class="pull-cmd" onclick="copy(this)">${esc(cmd)}</code></td>
                 </tr>`;
             }).join('');
         }
 
-        function escHtml(str) {
-            const div = document.createElement('div');
-            div.textContent = str;
-            return div.innerHTML;
-        }
+        function esc(s) { const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 
-        function copyCmd(el) {
-            const text = el.textContent;
-            navigator.clipboard.writeText(text).then(() => {
+        function copy(el) {
+            navigator.clipboard.writeText(el.textContent).then(() => {
                 el.classList.add('copied');
-                const original = el.textContent;
+                const o = el.textContent;
                 el.textContent = '✓ Copied!';
-                setTimeout(() => {
-                    el.textContent = original;
-                    el.classList.remove('copied');
-                }, 1500);
+                setTimeout(() => { el.textContent = o; el.classList.remove('copied'); }, 1500);
             });
         }
 
         // ============ INIT ============
         document.addEventListener('DOMContentLoaded', () => {
-            checkAuth();
-            renderTable();
             document.getElementById('searchBox').addEventListener('input', renderTable);
-
-            // Enter key navigation
-            document.getElementById('masterPassword').addEventListener('keydown', e => {
-                if (e.key === 'Enter') unlock();
-            });
-            document.getElementById('password').addEventListener('keydown', e => {
-                if (e.key === 'Enter') doLogin();
-            });
-            document.getElementById('username').addEventListener('keydown', e => {
-                if (e.key === 'Enter') document.getElementById('password').focus();
-            });
+            document.getElementById('password').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+            document.getElementById('username').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('password').focus(); });
         });
     </script>
 </body>
 </html>
 HTMLEOF
 
-# 使用 Python 加密用户配置并替换占位符
 python3 << PYEOF
 import json, os, secrets, hashlib, base64
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
@@ -718,22 +594,13 @@ NAMESPACE = "$NAMESPACE"
 MASTER_PASSWORD = "$MASTER_PASSWORD"
 USERS_CONFIG = "$USERS_CONFIG"
 
-# 读取版本数据
 with open(VERSIONS_FILE, 'r') as f:
     versions = json.load(f)
 
-# 读取页面模板
 with open(OUTPUT_FILE, 'r') as f:
     html = f.read()
 
-# 替换版本数据
-html = html.replace('__VERSIONS_JSON__', json.dumps(versions, ensure_ascii=False))
-
-# 替换 registry 和 namespace
-html = html.replace('__REGISTRY__', REGISTRY)
-html = html.replace('__NAMESPACE__', NAMESPACE)
-
-# 处理用户配置：计算 SHA-256 哈希
+# Build users dict with SHA-256 hashed passwords
 users_dict = {}
 if USERS_CONFIG:
     for pair in USERS_CONFIG.split(','):
@@ -743,49 +610,40 @@ if USERS_CONFIG:
             pwd_hash = hashlib.sha256(pwd.strip().encode()).hexdigest()
             users_dict[user.strip()] = pwd_hash
 
-# 加密用户配置
-if MASTER_PASSWORD and users_dict:
-    # 生成随机 salt 和 IV
+# Build combined data
+app_data = {
+    "users": users_dict,
+    "images": versions.get("images", []),
+    "last_updated": versions.get("last_updated", ""),
+    "registry": REGISTRY,
+    "namespace": NAMESPACE
+}
+
+# Encrypt everything
+if MASTER_PASSWORD:
     salt = secrets.token_bytes(16)
     iv = secrets.token_bytes(12)
-
-    # PBKDF2 派生密钥
-    kdf = PBKDF2HMAC(
-        algorithm=hashes.SHA256(),
-        length=32,
-        salt=salt,
-        iterations=100000,
-    )
+    kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=100000)
     key = kdf.derive(MASTER_PASSWORD.encode())
-
-    # AES-256-GCM 加密
     aesgcm = AESGCM(key)
-    plaintext = json.dumps(users_dict).encode('utf-8')
+    plaintext = json.dumps(app_data, ensure_ascii=False).encode('utf-8')
     ciphertext = aesgcm.encrypt(iv, plaintext, None)
 
-    # Base64 编码
-    salt_b64 = base64.b64encode(salt).decode()
-    iv_b64 = base64.b64encode(iv).decode()
-    ct_b64 = base64.b64encode(ciphertext).decode()
-
-    html = html.replace('__SALT_B64__', salt_b64)
-    html = html.replace('__IV_B64__', iv_b64)
-    html = html.replace('__CIPHERTEXT_B64__', ct_b64)
-
-    print("Users config encrypted successfully")
+    html = html.replace('__SALT_B64__', base64.b64encode(salt).decode())
+    html = html.replace('__IV_B64__', base64.b64encode(iv).decode())
+    html = html.replace('__DATA_B64__', base64.b64encode(ciphertext).decode())
+    print("All data encrypted with AES-256-GCM")
     print(f"  Users: {list(users_dict.keys())}")
-    print(f"  Salt: {salt_b64[:16]}...")
-    print(f"  Ciphertext length: {len(ct_b64)} chars")
+    print(f"  Images: {len(app_data['images'])}")
 else:
-    # 没有主密码或用户配置，使用空加密（允许任何登录）
+    # No encryption - for development only
     html = html.replace('__SALT_B64__', '')
     html = html.replace('__IV_B64__', '')
-    html = html.replace('__CIPHERTEXT_B64__', '')
-    print("WARNING: No PAGE_MASTER_PASSWORD or PAGE_USERS configured - auth disabled")
+    html = html.replace('__DATA_B64__', '')
+    print("WARNING: No PAGE_MASTER_PASSWORD - encryption disabled")
 
 with open(OUTPUT_FILE, 'w') as f:
     f.write(html)
 PYEOF
 
 echo "Page generated: $OUTPUT_FILE"
-echo "Images count: $(cat "$VERSIONS_FILE" | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["images"]))')"
