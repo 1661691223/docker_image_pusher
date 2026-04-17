@@ -87,9 +87,11 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
         <div class="box">
             <h2>🐳 Docker Registry</h2>
             <p>Sign in to continue</p>
-            <input type="text" id="user" placeholder="Username" autocomplete="username">
-            <input type="password" id="pass" placeholder="Password" autocomplete="current-password">
-            <button id="btn" onclick="login()">Login</button>
+            <form id="loginForm" onsubmit="login(); return false;">
+                <input type="text" id="user" name="username" placeholder="Username" autocomplete="username" required>
+                <input type="password" id="pass" name="password" placeholder="Password" autocomplete="current-password" required>
+                <button type="submit" id="btn">Login</button>
+            </form>
             <div id="err" class="err"></div>
         </div>
     </div>
@@ -200,7 +202,7 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
         }
 
         function ok(u){sessionStorage.setItem('s','1');sessionStorage.setItem('u',u);document.getElementById('overlay').classList.add('hidden');document.getElementById('main').classList.remove('hidden');document.getElementById('cur').textContent=u;render()}
-        function logout(){sessionStorage.clear();D=null;document.getElementById('overlay').classList.remove('hidden');document.getElementById('main').classList.add('hidden');document.getElementById('user').value='';document.getElementById('pass').value=''}
+        function logout(){sessionStorage.clear();D=null;document.getElementById('overlay').classList.remove('hidden');document.getElementById('main').classList.add('hidden');document.getElementById('loginForm').reset();}
         function show(m){const e=document.getElementById('err');e.textContent=m;e.style.display='block';setTimeout(()=>e.style.display='none',3000)}
 
         let cf='all',cs={k:'build_time',a:false};
