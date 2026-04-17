@@ -1,0 +1,26 @@
+[
+  {
+    "name": "nginx",
+    "namespace": "library",
+    "tag": "1.25.3",
+    "platform": "",
+    "build_time": "2024-01-15T10:30:00Z",
+    "run_id": "history-import"
+  },
+  {
+    "name": "alpine",
+    "namespace": "library",
+    "tag": "3.19",
+    "platform": "",
+    "build_time": "2024-01-10T08:00:00Z",
+    "run_id": "history-import"
+  },
+  {
+    "name": "alpine",
+    "namespace": "library",
+    "tag": "3.18",
+    "platform": "",
+    "build_time": "2024-01-05T08:00:00Z",
+    "run_id": "history-import"
+  }
+]

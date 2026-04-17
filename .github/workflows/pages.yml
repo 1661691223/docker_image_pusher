@@ -1,0 +1,84 @@
+name: Docker Pages
+
+on:
+  # 在 Docker workflow 完成后自动触发
+  workflow_run:
+    workflows: ["Docker"]
+    types:
+      - completed
+  # 手动触发
+  workflow_dispatch:
+  # push 到 main 分支时触发（修改 images.txt 或 pages 相关文件）
+  push:
+    branches: [main]
+    paths:
+      - 'images.txt'
+      - 'scripts/**'
+      - 'pages/**'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq
+
+      - name: Collect version data
+        env:
+          ALIYUN_REGISTRY: ${{ secrets.ALIYUN_REGISTRY }}
+          ALIYUN_NAME_SPACE: ${{ secrets.ALIYUN_NAME_SPACE }}
+        run: |
+          chmod +x scripts/collect_versions.sh
+          bash scripts/collect_versions.sh
+
+      - name: Generate page
+        env:
+          ALIYUN_REGISTRY: ${{ secrets.ALIYUN_REGISTRY }}
+          ALIYUN_NAME_SPACE: ${{ secrets.ALIYUN_NAME_SPACE }}
+          PAGE_USERS: ${{ secrets.PAGE_USERS }}
+        run: |
+          chmod +x scripts/generate_page.sh
+          bash scripts/generate_page.sh
+
+      - name: Commit version data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/versions.json
+          # 只在有变化时提交
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: update version data [skip ci]"
+            git push
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: pages/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
