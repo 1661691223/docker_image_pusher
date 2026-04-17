@@ -131,7 +131,6 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
         function b64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
         async function dk(pw,salt){const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(salt),iterations:100000,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['decrypt'])}
         async function dec(pw,salt,iv,ct){try{const k=await dk(pw,salt);const d=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(iv)},k,b64(ct));return new TextDecoder().decode(d)}catch{return null}}
-        async function sha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
 
         async function login(){
             const u=document.getElementById('user').value.trim();
@@ -143,9 +142,8 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
             const udata=CFG.users[u];
             if(!udata){btn.textContent='Login';btn.disabled=false;show('Invalid username or password');return}
 
-            // Verify password hash
-            const h=await sha(p);
-            if(h!==udata.hash){btn.textContent='Login';btn.disabled=false;show('Invalid username or password');return}
+            // No hash check - rely on decryption for authentication
+            // If password is wrong, decryption will fail
 
             // Decrypt master key with user's password
             const mk=await dec(p, udata.salt, udata.iv, udata.mk);
@@ -248,7 +246,6 @@ if USERS_CONFIG:
             mk_ct = user_aes.encrypt(user_iv, MASTER_PASSWORD.encode(), None)
 
             users_out[uname] = {
-                "hash": pwd_hash,
                 "salt": base64.b64encode(user_salt).decode(),
                 "iv": base64.b64encode(user_iv).decode(),
                 "mk": base64.b64encode(mk_ct).decode()
