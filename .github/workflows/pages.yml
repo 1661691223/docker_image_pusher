@@ -81,6 +81,7 @@ jobs:
         env:
           ALIYUN_REGISTRY: ${{ secrets.ALIYUN_REGISTRY }}
           ALIYUN_NAME_SPACE: ${{ secrets.ALIYUN_NAME_SPACE }}
+          PAGE_MASTER_PASSWORD: ${{ secrets.PAGE_MASTER_PASSWORD }}
           PAGE_USERS: ${{ secrets.PAGE_USERS }}
         run: |
           chmod +x scripts/generate_page.sh

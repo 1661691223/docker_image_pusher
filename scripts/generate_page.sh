@@ -1,8 +1,9 @@
 #!/bin/bash
-# generate_page.sh - 生成 GitHub Pages HTML 页面
+# generate_page.sh - 生成 GitHub Pages HTML 页面（AES-GCM 加密用户配置）
 # 用法: ./generate_page.sh
 # 环境变量:
-#   PAGE_USERS - 用户认证配置，格式: "user1:sha256hash1,user2:sha256hash2"
+#   PAGE_MASTER_PASSWORD - 主密码（用于加密用户配置）
+#   PAGE_USERS - 用户配置，格式: "user1:password1,user2:password2"
 #   ALIYUN_REGISTRY - 阿里云仓库地址
 #   ALIYUN_NAME_SPACE - 阿里云命名空间
 
@@ -20,6 +21,7 @@ mkdir -p "$OUTPUT_DIR"
 # 默认值
 REGISTRY="${ALIYUN_REGISTRY:-registry.cn-hangzhou.aliyuncs.com}"
 NAMESPACE="${ALIYUN_NAME_SPACE:-}"
+MASTER_PASSWORD="${PAGE_MASTER_PASSWORD:-}"
 USERS_CONFIG="${PAGE_USERS:-}"
 
 # 读取版本数据
@@ -30,7 +32,7 @@ else
     VERSIONS_JSON=$(cat "$VERSIONS_FILE")
 fi
 
-# 生成页面
+# 生成页面 HTML
 cat > "$OUTPUT_FILE" << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="zh-CN">
@@ -101,6 +103,11 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
             transition: background 0.2s;
         }
         .login-box button:hover { background: #2ea043; }
+        .login-box button:disabled {
+            background: #21262d;
+            color: #484f58;
+            cursor: not-allowed;
+        }
         .login-error {
             color: #f85149;
             text-align: center;
@@ -108,6 +115,25 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
             font-size: 14px;
             display: none;
         }
+        .login-hint {
+            color: #8b949e;
+            text-align: center;
+            margin-top: 16px;
+            font-size: 12px;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .step-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #30363d;
+        }
+        .step-dot.active { background: #58a6ff; }
+        .step-dot.done { background: #238636; }
         .header {
             background: #161b22;
             border-bottom: 1px solid #30363d;
@@ -123,18 +149,13 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
             align-items: center;
             gap: 10px;
         }
-        .header h1::before {
-            content: "🐳";
-        }
+        .header h1::before { content: "🐳"; }
         .header-right {
             display: flex;
             align-items: center;
             gap: 16px;
         }
-        .user-info {
-            color: #8b949e;
-            font-size: 14px;
-        }
+        .user-info { color: #8b949e; font-size: 14px; }
         .logout-btn {
             background: transparent;
             border: 1px solid #30363d;
@@ -279,20 +300,6 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
         }
         .empty-state h3 { margin-bottom: 8px; color: #c9d1d9; }
         .hidden { display: none !important; }
-        .tooltip {
-            position: fixed;
-            background: #3fb950;
-            color: #0d1117;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            pointer-events: none;
-            z-index: 999;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .tooltip.show { opacity: 1; }
         @media (max-width: 768px) {
             .stats { flex-wrap: wrap; }
             .stat-card { min-width: 120px; }
@@ -305,11 +312,32 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
     <div id="loginOverlay" class="login-overlay">
         <div class="login-box">
             <h2>🐳 Docker Registry</h2>
-            <p>Please login to continue</p>
-            <input type="text" id="username" placeholder="Username" autocomplete="username">
-            <input type="password" id="password" placeholder="Password" autocomplete="current-password">
-            <button onclick="doLogin()">Login</button>
-            <div id="loginError" class="login-error">Invalid username or password</div>
+
+            <!-- Step 1: Master Password -->
+            <div id="stepMaster">
+                <div class="step-indicator">
+                    <div class="step-dot active"></div>
+                    <div class="step-dot"></div>
+                </div>
+                <p>Enter master password to unlock</p>
+                <input type="password" id="masterPassword" placeholder="Master Password" autocomplete="off">
+                <button id="unlockBtn" onclick="unlock()">Unlock</button>
+                <div id="masterError" class="login-error"></div>
+                <div class="login-hint">Master password is configured by admin in GitHub Secrets</div>
+            </div>
+
+            <!-- Step 2: User Login -->
+            <div id="stepUser" class="hidden">
+                <div class="step-indicator">
+                    <div class="step-dot done"></div>
+                    <div class="step-dot active"></div>
+                </div>
+                <p>Login with your credentials</p>
+                <input type="text" id="username" placeholder="Username" autocomplete="username">
+                <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+                <button onclick="doLogin()">Login</button>
+                <div id="loginError" class="login-error"></div>
+            </div>
         </div>
     </div>
 
@@ -367,46 +395,125 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
         </div>
     </div>
 
-    <div id="tooltip" class="tooltip">Copied!</div>
-
     <script>
-        // ============ CONFIGURATION ============
-        // Users are injected at build time from GitHub Secrets
-        // Format: { "username": "sha256hash", ... }
-        const AUTHORIZED_USERS = __USERS_CONFIG__;
+        // ============ ENCRYPTED CONFIG ============
+        // Data is encrypted at build time with AES-256-GCM
+        // Decrypted at runtime using the master password
+        const ENCRYPTED_CONFIG = {
+            salt: "__SALT_B64__",
+            iv: "__IV_B64__",
+            ciphertext: "__CIPHERTEXT_B64__"
+        };
 
-        // Registry configuration
+        // Registry configuration (not sensitive)
         const REGISTRY = "__REGISTRY__";
         const NAMESPACE = "__NAMESPACE__";
 
-        // Version data
+        // Version data (not sensitive)
         const VERSION_DATA = __VERSIONS_JSON__;
 
-        // ============ AUTH ============
-        async function sha256(message) {
-            const msgBuffer = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        // ============ CRYPTO ============
+        let decryptedUsers = null;
+
+        async function deriveKey(password, salt) {
+            const enc = new TextEncoder();
+            const keyMaterial = await crypto.subtle.importKey(
+                'raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']
+            );
+            return crypto.subtle.deriveKey(
+                { name: 'PBKDF2', salt: salt, iterations: 100000, hash: 'SHA-256' },
+                keyMaterial,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['decrypt']
+            );
+        }
+
+        function b64ToArrayBuffer(b64) {
+            const binary = atob(b64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        async function decryptConfig(password) {
+            try {
+                const salt = b64ToArrayBuffer(ENCRYPTED_CONFIG.salt);
+                const iv = b64ToArrayBuffer(ENCRYPTED_CONFIG.iv);
+                const ciphertext = b64ToArrayBuffer(ENCRYPTED_CONFIG.ciphertext);
+
+                const key = await deriveKey(password, salt);
+                const decrypted = await crypto.subtle.decrypt(
+                    { name: 'AES-GCM', iv: iv },
+                    key,
+                    ciphertext
+                );
+
+                const decoder = new TextDecoder();
+                const jsonStr = decoder.decode(decrypted);
+                return JSON.parse(jsonStr);
+            } catch (e) {
+                console.error('Decryption failed:', e);
+                return null;
+            }
+        }
+
+        // ============ AUTH FLOW ============
+        async function unlock() {
+            const btn = document.getElementById('unlockBtn');
+            const masterPw = document.getElementById('masterPassword').value;
+            const errorEl = document.getElementById('masterError');
+
+            if (!masterPw) {
+                showMasterError('Please enter master password');
+                return;
+            }
+
+            btn.textContent = 'Decrypting...';
+            btn.disabled = true;
+
+            const users = await decryptConfig(masterPw);
+
+            btn.textContent = 'Unlock';
+            btn.disabled = false;
+
+            if (!users || Object.keys(users).length === 0) {
+                showMasterError('Invalid master password');
+                return;
+            }
+
+            decryptedUsers = users;
+            document.getElementById('stepMaster').classList.add('hidden');
+            document.getElementById('stepUser').classList.remove('hidden');
+            document.getElementById('username').focus();
+        }
+
+        function showMasterError(msg) {
+            const el = document.getElementById('masterError');
+            el.textContent = msg;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
         }
 
         async function doLogin() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
-            
+            const errorEl = document.getElementById('loginError');
+
             if (!username || !password) {
                 showError('Please enter username and password');
                 return;
             }
 
-            // 如果没有配置用户，允许任何登录（开发模式）
-            if (Object.keys(AUTHORIZED_USERS).length === 0) {
-                loginSuccess(username);
-                return;
-            }
+            // Compute SHA-256 of entered password and compare
+            const msgBuffer = new TextEncoder().encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-            const hash = await sha256(password);
-            if (AUTHORIZED_USERS[username] && AUTHORIZED_USERS[username] === hash) {
+            if (decryptedUsers[username] && decryptedUsers[username] === hash) {
                 loginSuccess(username);
             } else {
                 showError('Invalid username or password');
@@ -425,8 +532,12 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
         function doLogout() {
             sessionStorage.removeItem('loggedIn');
             sessionStorage.removeItem('username');
+            decryptedUsers = null;
             document.getElementById('loginOverlay').classList.remove('hidden');
             document.getElementById('mainContent').classList.add('hidden');
+            document.getElementById('stepMaster').classList.remove('hidden');
+            document.getElementById('stepUser').classList.add('hidden');
+            document.getElementById('masterPassword').value = '';
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
         }
@@ -438,7 +549,6 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
             setTimeout(() => el.style.display = 'none', 3000);
         }
 
-        // 检查登录状态
         function checkAuth() {
             if (sessionStorage.getItem('loggedIn') === 'true') {
                 document.getElementById('loginOverlay').classList.add('hidden');
@@ -473,7 +583,6 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
             const search = document.getElementById('searchBox').value.toLowerCase();
             let images = VERSION_DATA.images || [];
 
-            // Search filter
             if (search) {
                 images = images.filter(img =>
                     img.name.toLowerCase().includes(search) ||
@@ -483,14 +592,12 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
                 );
             }
 
-            // Platform filter
             if (currentFilter !== 'all') {
                 images = images.filter(img =>
                     (img.platform || '').toLowerCase().includes(currentFilter)
                 );
             }
 
-            // Sort
             images.sort((a, b) => {
                 let va = (a[currentSort.key] || '').toLowerCase();
                 let vb = (b[currentSort.key] || '').toLowerCase();
@@ -503,20 +610,12 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
         }
 
         function buildPullCmd(img) {
-            // docker.yaml 拼接规则:
-            // new_image = $ALIYUN_REGISTRY/$ALIYUN_NAME_SPACE/$platform_prefix$name_space_prefix$image_name_tag
-            //
-            // platform_prefix: linux/amd64 -> linux_amd64_  (有platform时)
-            // name_space_prefix: namespace_  (仅当镜像名跨命名空间重复时)
-            // image_name_tag: name:tag
-
             let platformPrefix = '';
             if (img.platform) {
                 platformPrefix = img.platform.replace(/\//g, '_') + '_';
             }
 
             let nsPrefix = '';
-            // 检查是否有同名镜像来自不同命名空间
             const images = VERSION_DATA.images || [];
             const sameName = images.filter(i => i.name === img.name);
             const namespaces = [...new Set(sameName.map(i => i.namespace || ''))];
@@ -524,8 +623,7 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
                 nsPrefix = img.namespace + '_';
             }
 
-            const pullName = `${REGISTRY}/${NAMESPACE}/${platformPrefix}${nsPrefix}${img.name}:${img.tag}`;
-            return `docker pull ${pullName}`;
+            return `docker pull ${REGISTRY}/${NAMESPACE}/${platformPrefix}${nsPrefix}${img.name}:${img.tag}`;
         }
 
         function renderTable() {
@@ -533,7 +631,6 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
             const tbody = document.getElementById('imageBody');
             const emptyState = document.getElementById('emptyState');
 
-            // Stats
             document.getElementById('statTotal').textContent = images.length;
             const uniqueNames = new Set(images.map(i => i.name));
             document.getElementById('statNames').textContent = uniqueNames.size;
@@ -590,8 +687,11 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
             checkAuth();
             renderTable();
             document.getElementById('searchBox').addEventListener('input', renderTable);
-            
-            // Enter key for login
+
+            // Enter key navigation
+            document.getElementById('masterPassword').addEventListener('keydown', e => {
+                if (e.key === 'Enter') unlock();
+            });
             document.getElementById('password').addEventListener('keydown', e => {
                 if (e.key === 'Enter') doLogin();
             });
@@ -604,41 +704,88 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
 </html>
 HTMLEOF
 
-# 使用 sed 替换占位符
-python3 -c "
-import json, sys
+# 使用 Python 加密用户配置并替换占位符
+python3 << PYEOF
+import json, os, secrets, hashlib, base64
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+
+VERSIONS_FILE = "$VERSIONS_FILE"
+OUTPUT_FILE = "$OUTPUT_FILE"
+REGISTRY = "$REGISTRY"
+NAMESPACE = "$NAMESPACE"
+MASTER_PASSWORD = "$MASTER_PASSWORD"
+USERS_CONFIG = "$USERS_CONFIG"
 
 # 读取版本数据
-with open('$VERSIONS_FILE', 'r') as f:
+with open(VERSIONS_FILE, 'r') as f:
     versions = json.load(f)
 
-# 读取页面
-with open('$OUTPUT_FILE', 'r') as f:
+# 读取页面模板
+with open(OUTPUT_FILE, 'r') as f:
     html = f.read()
 
 # 替换版本数据
 html = html.replace('__VERSIONS_JSON__', json.dumps(versions, ensure_ascii=False))
 
 # 替换 registry 和 namespace
-html = html.replace('__REGISTRY__', '$REGISTRY')
-html = html.replace('__NAMESPACE__', '$NAMESPACE')
+html = html.replace('__REGISTRY__', REGISTRY)
+html = html.replace('__NAMESPACE__', NAMESPACE)
 
-# 处理用户配置
-users_config = '$USERS_CONFIG'
-if users_config:
-    users_dict = {}
-    for pair in users_config.split(','):
+# 处理用户配置：计算 SHA-256 哈希
+users_dict = {}
+if USERS_CONFIG:
+    for pair in USERS_CONFIG.split(','):
         pair = pair.strip()
         if ':' in pair:
-            user, pwd_hash = pair.split(':', 1)
-            users_dict[user.strip()] = pwd_hash.strip()
-    html = html.replace('__USERS_CONFIG__', json.dumps(users_dict))
-else:
-    html = html.replace('__USERS_CONFIG__', '{}')
+            user, pwd = pair.split(':', 1)
+            pwd_hash = hashlib.sha256(pwd.strip().encode()).hexdigest()
+            users_dict[user.strip()] = pwd_hash
 
-with open('$OUTPUT_FILE', 'w') as f:
+# 加密用户配置
+if MASTER_PASSWORD and users_dict:
+    # 生成随机 salt 和 IV
+    salt = secrets.token_bytes(16)
+    iv = secrets.token_bytes(12)
+
+    # PBKDF2 派生密钥
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=100000,
+    )
+    key = kdf.derive(MASTER_PASSWORD.encode())
+
+    # AES-256-GCM 加密
+    aesgcm = AESGCM(key)
+    plaintext = json.dumps(users_dict).encode('utf-8')
+    ciphertext = aesgcm.encrypt(iv, plaintext, None)
+
+    # Base64 编码
+    salt_b64 = base64.b64encode(salt).decode()
+    iv_b64 = base64.b64encode(iv).decode()
+    ct_b64 = base64.b64encode(ciphertext).decode()
+
+    html = html.replace('__SALT_B64__', salt_b64)
+    html = html.replace('__IV_B64__', iv_b64)
+    html = html.replace('__CIPHERTEXT_B64__', ct_b64)
+
+    print("Users config encrypted successfully")
+    print(f"  Users: {list(users_dict.keys())}")
+    print(f"  Salt: {salt_b64[:16]}...")
+    print(f"  Ciphertext length: {len(ct_b64)} chars")
+else:
+    # 没有主密码或用户配置，使用空加密（允许任何登录）
+    html = html.replace('__SALT_B64__', '')
+    html = html.replace('__IV_B64__', '')
+    html = html.replace('__CIPHERTEXT_B64__', '')
+    print("WARNING: No PAGE_MASTER_PASSWORD or PAGE_USERS configured - auth disabled")
+
+with open(OUTPUT_FILE, 'w') as f:
     f.write(html)
-"
+PYEOF
 
 echo "Page generated: $OUTPUT_FILE"
 echo "Images count: $(cat "$VERSIONS_FILE" | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["images"]))')"

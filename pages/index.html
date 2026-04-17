@@ -67,6 +67,11 @@
             transition: background 0.2s;
         }
         .login-box button:hover { background: #2ea043; }
+        .login-box button:disabled {
+            background: #21262d;
+            color: #484f58;
+            cursor: not-allowed;
+        }
         .login-error {
             color: #f85149;
             text-align: center;
@@ -74,6 +79,25 @@
             font-size: 14px;
             display: none;
         }
+        .login-hint {
+            color: #8b949e;
+            text-align: center;
+            margin-top: 16px;
+            font-size: 12px;
+        }
+        .step-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        .step-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #30363d;
+        }
+        .step-dot.active { background: #58a6ff; }
+        .step-dot.done { background: #238636; }
         .header {
             background: #161b22;
             border-bottom: 1px solid #30363d;
@@ -89,18 +113,13 @@
             align-items: center;
             gap: 10px;
         }
-        .header h1::before {
-            content: "🐳";
-        }
+        .header h1::before { content: "🐳"; }
         .header-right {
             display: flex;
             align-items: center;
             gap: 16px;
         }
-        .user-info {
-            color: #8b949e;
-            font-size: 14px;
-        }
+        .user-info { color: #8b949e; font-size: 14px; }
         .logout-btn {
             background: transparent;
             border: 1px solid #30363d;
@@ -245,20 +264,6 @@
         }
         .empty-state h3 { margin-bottom: 8px; color: #c9d1d9; }
         .hidden { display: none !important; }
-        .tooltip {
-            position: fixed;
-            background: #3fb950;
-            color: #0d1117;
-            padding: 6px 12px;
-            border-radius: 6px;
-            font-size: 13px;
-            font-weight: 600;
-            pointer-events: none;
-            z-index: 999;
-            opacity: 0;
-            transition: opacity 0.2s;
-        }
-        .tooltip.show { opacity: 1; }
         @media (max-width: 768px) {
             .stats { flex-wrap: wrap; }
             .stat-card { min-width: 120px; }
@@ -271,11 +276,32 @@
     <div id="loginOverlay" class="login-overlay">
         <div class="login-box">
             <h2>🐳 Docker Registry</h2>
-            <p>Please login to continue</p>
-            <input type="text" id="username" placeholder="Username" autocomplete="username">
-            <input type="password" id="password" placeholder="Password" autocomplete="current-password">
-            <button onclick="doLogin()">Login</button>
-            <div id="loginError" class="login-error">Invalid username or password</div>
+
+            <!-- Step 1: Master Password -->
+            <div id="stepMaster">
+                <div class="step-indicator">
+                    <div class="step-dot active"></div>
+                    <div class="step-dot"></div>
+                </div>
+                <p>Enter master password to unlock</p>
+                <input type="password" id="masterPassword" placeholder="Master Password" autocomplete="off">
+                <button id="unlockBtn" onclick="unlock()">Unlock</button>
+                <div id="masterError" class="login-error"></div>
+                <div class="login-hint">Master password is configured by admin in GitHub Secrets</div>
+            </div>
+
+            <!-- Step 2: User Login -->
+            <div id="stepUser" class="hidden">
+                <div class="step-indicator">
+                    <div class="step-dot done"></div>
+                    <div class="step-dot active"></div>
+                </div>
+                <p>Login with your credentials</p>
+                <input type="text" id="username" placeholder="Username" autocomplete="username">
+                <input type="password" id="password" placeholder="Password" autocomplete="current-password">
+                <button onclick="doLogin()">Login</button>
+                <div id="loginError" class="login-error"></div>
+            </div>
         </div>
     </div>
 
@@ -333,46 +359,125 @@
         </div>
     </div>
 
-    <div id="tooltip" class="tooltip">Copied!</div>
-
     <script>
-        // ============ CONFIGURATION ============
-        // Users are injected at build time from GitHub Secrets
-        // Format: { "username": "sha256hash", ... }
-        const AUTHORIZED_USERS = {};
+        // ============ ENCRYPTED CONFIG ============
+        // Data is encrypted at build time with AES-256-GCM
+        // Decrypted at runtime using the master password
+        const ENCRYPTED_CONFIG = {
+            salt: "+XvsGCMWN7JsCuoFrsW9JQ==",
+            iv: "BhSsE4KDhVfKal7p",
+            ciphertext: "sjwAnBwG2rGyO4mba43mbgg5bK8mVqNV6FwKlumQVAgBe+1cgcYalStHjheFP0PC5X8zkprcScSYsg/HpSCGS+0OIyzL+dkbdbOPwg/fzHMRA3b3feQF6bqrV6Ph+8209JlNJ1qIFbDaqWvkSGGvMlVpT9f7vHqY25Tklqmic4Aji5duzu1a3kQIcKfOJth+7Je4aRfS+/A6ctAcljuQB5gVVVfb+JJKkYmUAeBXtRxmJT8F+hCw7SdTq2MEL38obbiOVkFUa3qxLxjuKhWEf/GTnZKBVLNuSL0m5Tcd/5uQ40d7OC+J9SKJqwweED0o6Q7n5cG19w=="
+        };
 
-        // Registry configuration
+        // Registry configuration (not sensitive)
         const REGISTRY = "registry.cn-hangzhou.aliyuncs.com";
-        const NAMESPACE = "my-namespace";
+        const NAMESPACE = "publicdr";
 
-        // Version data
-        const VERSION_DATA = {"images": [{"registry": "docker.io", "namespace": "justlikemaki", "name": "aiclient-2-api", "tag": "2.13.7", "platform": "", "build_time": "2026-04-17T07:08:25Z", "run_id": "manual"}, {"name": "nginx", "namespace": "library", "tag": "1.25.3", "platform": "", "registry": "registry.cn-hangzhou.aliyuncs.com", "build_time": "2024-01-15T10:30:00Z", "run_id": "history-import"}, {"name": "alpine", "namespace": "library", "tag": "3.19", "platform": "", "registry": "registry.cn-hangzhou.aliyuncs.com", "build_time": "2024-01-10T08:00:00Z", "run_id": "history-import"}, {"name": "alpine", "namespace": "library", "tag": "3.18", "platform": "", "registry": "registry.cn-hangzhou.aliyuncs.com", "build_time": "2024-01-05T08:00:00Z", "run_id": "history-import"}], "last_updated": "2026-04-17T07:09:33Z"};
+        // Version data (not sensitive)
+        const VERSION_DATA = {"images": [{"registry": "docker.io", "namespace": "justlikemaki", "name": "aiclient-2-api", "tag": "2.13.7", "platform": "", "build_time": "2026-04-17T10:17:51Z", "run_id": "24560066291"}], "last_updated": "2026-04-17T10:17:51Z"};
 
-        // ============ AUTH ============
-        async function sha256(message) {
-            const msgBuffer = new TextEncoder().encode(message);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        // ============ CRYPTO ============
+        let decryptedUsers = null;
+
+        async function deriveKey(password, salt) {
+            const enc = new TextEncoder();
+            const keyMaterial = await crypto.subtle.importKey(
+                'raw', enc.encode(password), 'PBKDF2', false, ['deriveKey']
+            );
+            return crypto.subtle.deriveKey(
+                { name: 'PBKDF2', salt: salt, iterations: 100000, hash: 'SHA-256' },
+                keyMaterial,
+                { name: 'AES-GCM', length: 256 },
+                false,
+                ['decrypt']
+            );
+        }
+
+        function b64ToArrayBuffer(b64) {
+            const binary = atob(b64);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return bytes.buffer;
+        }
+
+        async function decryptConfig(password) {
+            try {
+                const salt = b64ToArrayBuffer(ENCRYPTED_CONFIG.salt);
+                const iv = b64ToArrayBuffer(ENCRYPTED_CONFIG.iv);
+                const ciphertext = b64ToArrayBuffer(ENCRYPTED_CONFIG.ciphertext);
+
+                const key = await deriveKey(password, salt);
+                const decrypted = await crypto.subtle.decrypt(
+                    { name: 'AES-GCM', iv: iv },
+                    key,
+                    ciphertext
+                );
+
+                const decoder = new TextDecoder();
+                const jsonStr = decoder.decode(decrypted);
+                return JSON.parse(jsonStr);
+            } catch (e) {
+                console.error('Decryption failed:', e);
+                return null;
+            }
+        }
+
+        // ============ AUTH FLOW ============
+        async function unlock() {
+            const btn = document.getElementById('unlockBtn');
+            const masterPw = document.getElementById('masterPassword').value;
+            const errorEl = document.getElementById('masterError');
+
+            if (!masterPw) {
+                showMasterError('Please enter master password');
+                return;
+            }
+
+            btn.textContent = 'Decrypting...';
+            btn.disabled = true;
+
+            const users = await decryptConfig(masterPw);
+
+            btn.textContent = 'Unlock';
+            btn.disabled = false;
+
+            if (!users || Object.keys(users).length === 0) {
+                showMasterError('Invalid master password');
+                return;
+            }
+
+            decryptedUsers = users;
+            document.getElementById('stepMaster').classList.add('hidden');
+            document.getElementById('stepUser').classList.remove('hidden');
+            document.getElementById('username').focus();
+        }
+
+        function showMasterError(msg) {
+            const el = document.getElementById('masterError');
+            el.textContent = msg;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
         }
 
         async function doLogin() {
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
-            
+            const errorEl = document.getElementById('loginError');
+
             if (!username || !password) {
                 showError('Please enter username and password');
                 return;
             }
 
-            // 如果没有配置用户，允许任何登录（开发模式）
-            if (Object.keys(AUTHORIZED_USERS).length === 0) {
-                loginSuccess(username);
-                return;
-            }
+            // Compute SHA-256 of entered password and compare
+            const msgBuffer = new TextEncoder().encode(password);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
-            const hash = await sha256(password);
-            if (AUTHORIZED_USERS[username] && AUTHORIZED_USERS[username] === hash) {
+            if (decryptedUsers[username] && decryptedUsers[username] === hash) {
                 loginSuccess(username);
             } else {
                 showError('Invalid username or password');
@@ -391,8 +496,12 @@
         function doLogout() {
             sessionStorage.removeItem('loggedIn');
             sessionStorage.removeItem('username');
+            decryptedUsers = null;
             document.getElementById('loginOverlay').classList.remove('hidden');
             document.getElementById('mainContent').classList.add('hidden');
+            document.getElementById('stepMaster').classList.remove('hidden');
+            document.getElementById('stepUser').classList.add('hidden');
+            document.getElementById('masterPassword').value = '';
             document.getElementById('username').value = '';
             document.getElementById('password').value = '';
         }
@@ -404,7 +513,6 @@
             setTimeout(() => el.style.display = 'none', 3000);
         }
 
-        // 检查登录状态
         function checkAuth() {
             if (sessionStorage.getItem('loggedIn') === 'true') {
                 document.getElementById('loginOverlay').classList.add('hidden');
@@ -439,7 +547,6 @@
             const search = document.getElementById('searchBox').value.toLowerCase();
             let images = VERSION_DATA.images || [];
 
-            // Search filter
             if (search) {
                 images = images.filter(img =>
                     img.name.toLowerCase().includes(search) ||
@@ -449,14 +556,12 @@
                 );
             }
 
-            // Platform filter
             if (currentFilter !== 'all') {
                 images = images.filter(img =>
                     (img.platform || '').toLowerCase().includes(currentFilter)
                 );
             }
 
-            // Sort
             images.sort((a, b) => {
                 let va = (a[currentSort.key] || '').toLowerCase();
                 let vb = (b[currentSort.key] || '').toLowerCase();
@@ -469,20 +574,12 @@
         }
 
         function buildPullCmd(img) {
-            // docker.yaml 拼接规则:
-            // new_image = $ALIYUN_REGISTRY/$ALIYUN_NAME_SPACE/$platform_prefix$name_space_prefix$image_name_tag
-            //
-            // platform_prefix: linux/amd64 -> linux_amd64_  (有platform时)
-            // name_space_prefix: namespace_  (仅当镜像名跨命名空间重复时)
-            // image_name_tag: name:tag
-
             let platformPrefix = '';
             if (img.platform) {
                 platformPrefix = img.platform.replace(/\//g, '_') + '_';
             }
 
             let nsPrefix = '';
-            // 检查是否有同名镜像来自不同命名空间
             const images = VERSION_DATA.images || [];
             const sameName = images.filter(i => i.name === img.name);
             const namespaces = [...new Set(sameName.map(i => i.namespace || ''))];
@@ -490,8 +587,7 @@
                 nsPrefix = img.namespace + '_';
             }
 
-            const pullName = `${REGISTRY}/${NAMESPACE}/${platformPrefix}${nsPrefix}${img.name}:${img.tag}`;
-            return `docker pull ${pullName}`;
+            return `docker pull ${REGISTRY}/${NAMESPACE}/${platformPrefix}${nsPrefix}${img.name}:${img.tag}`;
         }
 
         function renderTable() {
@@ -499,7 +595,6 @@
             const tbody = document.getElementById('imageBody');
             const emptyState = document.getElementById('emptyState');
 
-            // Stats
             document.getElementById('statTotal').textContent = images.length;
             const uniqueNames = new Set(images.map(i => i.name));
             document.getElementById('statNames').textContent = uniqueNames.size;
@@ -556,8 +651,11 @@
             checkAuth();
             renderTable();
             document.getElementById('searchBox').addEventListener('input', renderTable);
-            
-            // Enter key for login
+
+            // Enter key navigation
+            document.getElementById('masterPassword').addEventListener('keydown', e => {
+                if (e.key === 'Enter') unlock();
+            });
             document.getElementById('password').addEventListener('keydown', e => {
                 if (e.key === 'Enter') doLogin();
             });
