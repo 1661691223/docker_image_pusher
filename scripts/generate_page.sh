@@ -1,6 +1,9 @@
 #!/bin/bash
 # generate_page.sh - 生成 GitHub Pages HTML 页面
-# 每个用户持有用自己密码加密的主密钥，一次输入完成登录
+# 安全特性：
+# - 密码哈希: PBKDF2(password, user_hash_salt, 100000)
+# - 数据加密: AES-256-GCM with PBKDF2-derived key
+# - 每用户独立 salt，无哈希可比对
 
 set -euo pipefail
 
@@ -122,39 +125,77 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
         </div>
     </div>
     <script>
-        // Encrypted config: each user has their own encrypted copy of the master key
-        // Data is encrypted with the master key
         const CFG = __ENCRYPTED_JSON__;
+        let D = null;
 
-        let D = null; // decrypted data
-
+        // Base64 helpers
         function b64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
-        async function dk(pw,salt){const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(salt),iterations:100000,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['decrypt'])}
-        async function dec(pw,salt,iv,ct){try{const k=await dk(pw,salt);const d=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(iv)},k,b64(ct));return new TextDecoder().decode(d)}catch{return null}}
+        function hex(buf){return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('')}
+
+        // PBKDF2 key derivation
+        async function pbkdf2(pw, salt, usage){
+            const km = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveBits']);
+            const bits = await crypto.subtle.deriveBits(
+                {name:'PBKDF2', salt:b64(salt), iterations:100000, hash:'SHA-256'},
+                km, 256
+            );
+            if(usage === 'hash') return hex(bits);
+            // For encryption, convert to CryptoKey
+            return crypto.subtle.importKey('raw', bits, 'AES-GCM', false, ['decrypt']);
+        }
+
+        // AES-GCM decryption
+        async function aesDecrypt(key, iv, ct){
+            try {
+                const dec = await crypto.subtle.decrypt({name:'AES-GCM', iv:b64(iv)}, key, b64(ct));
+                return new TextDecoder().decode(dec);
+            } catch { return null; }
+        }
 
         async function login(){
-            const u=document.getElementById('user').value.trim();
-            const p=document.getElementById('pass').value;
-            const btn=document.getElementById('btn');
-            if(!u||!p){show('Please enter username and password');return}
-            btn.textContent='Verifying...';btn.disabled=true;
+            const u = document.getElementById('user').value.trim();
+            const p = document.getElementById('pass').value;
+            const btn = document.getElementById('btn');
+            if(!u || !p){ show('Please enter username and password'); return; }
 
-            const udata=CFG.users[u];
-            if(!udata){btn.textContent='Login';btn.disabled=false;show('Invalid username or password');return}
+            const udata = CFG.users[u];
+            if(!udata){ show('Invalid username or password'); return; }
 
-            // No hash check - rely on decryption for authentication
-            // If password is wrong, decryption will fail
+            btn.textContent = 'Verifying...';
+            btn.disabled = true;
 
-            // Decrypt master key with user's password
-            const mk=await dec(p, udata.salt, udata.iv, udata.mk);
-            if(!mk){btn.textContent='Login';btn.disabled=false;show('Decryption failed');return}
+            // Step 1: Verify password hash (PBKDF2 with hash_salt)
+            const hash = await pbkdf2(p, udata.hash_salt, 'hash');
+            if(hash !== udata.hash){
+                btn.textContent = 'Login';
+                btn.disabled = false;
+                show('Invalid username or password');
+                return;
+            }
 
-            // Decrypt data with master key
-            const raw=await dec(mk, CFG.salt, CFG.iv, CFG.data);
-            if(!raw){btn.textContent='Login';btn.disabled=false;show('Data decryption failed');return}
+            // Step 2: Decrypt master key (PBKDF2 with enc_salt)
+            const encKey = await pbkdf2(p, udata.enc_salt, 'decrypt');
+            const mk = await aesDecrypt(encKey, udata.iv, udata.mk);
+            if(!mk){
+                btn.textContent = 'Login';
+                btn.disabled = false;
+                show('Decryption error');
+                return;
+            }
 
-            D=JSON.parse(raw);
-            btn.textContent='Login';btn.disabled=false;
+            // Step 3: Decrypt data with master key
+            const mkKey = await pbkdf2(mk, CFG.salt, 'decrypt');
+            const raw = await aesDecrypt(mkKey, CFG.iv, CFG.data);
+            if(!raw){
+                btn.textContent = 'Login';
+                btn.disabled = false;
+                show('Data error');
+                return;
+            }
+
+            D = JSON.parse(raw);
+            btn.textContent = 'Login';
+            btn.disabled = false;
             ok(u);
         }
 
@@ -210,7 +251,7 @@ with open(VERSIONS_FILE, 'r') as f:
 with open(OUTPUT_FILE, 'r') as f:
     html = f.read()
 
-# Build master data (registry + images)
+# Master data to encrypt
 master_data = {
     "images": versions.get("images", []),
     "last_updated": versions.get("last_updated", ""),
@@ -218,39 +259,49 @@ master_data = {
     "namespace": NAMESPACE
 }
 
-# Generate master key and encrypt data
+# Generate master encryption key
 master_salt = secrets.token_bytes(16)
 master_iv = secrets.token_bytes(12)
-kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=master_salt, iterations=100000)
-master_key = kdf.derive(MASTER_PASSWORD.encode())
-aesgcm = AESGCM(master_key)
-data_ct = aesgcm.encrypt(master_iv, json.dumps(master_data, ensure_ascii=False).encode(), None)
+master_kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=master_salt, iterations=100000)
+master_key = master_kdf.derive(MASTER_PASSWORD.encode())
 
-# Build users: each user gets encrypted copy of master key
+# Encrypt master data
+data_aes = AESGCM(master_key)
+data_ct = data_aes.encrypt(master_iv, json.dumps(master_data, ensure_ascii=False).encode(), None)
+
+# Build users with separate salts for hash and encryption
 users_out = {}
 if USERS_CONFIG:
     for pair in USERS_CONFIG.split(','):
         pair = pair.strip()
-        if ':' in pair:
-            uname, pwd = pair.split(':', 1)
-            uname = uname.strip()
-            pwd = pwd.strip()
-            pwd_hash = hashlib.sha256(pwd.encode()).hexdigest()
+        if ':' not in pair:
+            continue
+        uname, pwd = pair.split(':', 1)
+        uname, pwd = uname.strip(), pwd.strip()
 
-            # Encrypt master key with user's password
-            user_salt = secrets.token_bytes(16)
-            user_iv = secrets.token_bytes(12)
-            user_kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=user_salt, iterations=100000)
-            user_key = user_kdf.derive(pwd.encode())
-            user_aes = AESGCM(user_key)
-            mk_ct = user_aes.encrypt(user_iv, MASTER_PASSWORD.encode(), None)
+        # 1. Generate hash: PBKDF2(password, hash_salt, 100000) -> hex
+        hash_salt = secrets.token_bytes(16)
+        hash_kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=hash_salt, iterations=100000)
+        pwd_hash = hash_kdf.derive(pwd.encode())
+        pwd_hash_hex = pwd_hash.hex()
 
-            users_out[uname] = {
-                "salt": base64.b64encode(user_salt).decode(),
-                "iv": base64.b64encode(user_iv).decode(),
-                "mk": base64.b64encode(mk_ct).decode()
-            }
+        # 2. Encrypt master key with user's password (separate salt!)
+        enc_salt = secrets.token_bytes(16)
+        enc_iv = secrets.token_bytes(12)
+        enc_kdf = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=enc_salt, iterations=100000)
+        enc_key = enc_kdf.derive(pwd.encode())
+        enc_aes = AESGCM(enc_key)
+        mk_ct = enc_aes.encrypt(enc_iv, MASTER_PASSWORD.encode(), None)
 
+        users_out[uname] = {
+            "hash_salt": base64.b64encode(hash_salt).decode(),
+            "hash": pwd_hash_hex,
+            "enc_salt": base64.b64encode(enc_salt).decode(),
+            "iv": base64.b64encode(enc_iv).decode(),
+            "mk": base64.b64encode(mk_ct).decode()
+        }
+
+# Final encrypted config
 encrypted = {
     "salt": base64.b64encode(master_salt).decode(),
     "iv": base64.b64encode(master_iv).decode(),
@@ -266,6 +317,8 @@ with open(OUTPUT_FILE, 'w') as f:
 print("Done!")
 print(f"  Users: {list(users_out.keys())}")
 print(f"  Images: {len(master_data['images'])}")
+print(f"  Hash: PBKDF2-SHA256-100k with per-user salt")
+print(f"  Encryption: AES-256-GCM with PBKDF2-derived key")
 PYEOF
 
 echo "Page generated: $OUTPUT_FILE"
