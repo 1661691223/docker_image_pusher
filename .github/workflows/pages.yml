@@ -1,9 +1,9 @@
 name: Docker Pages
 
 on:
-  # 在 Docker workflow 完成后自动触发
+  # 在 Docker 或 SGLang workflow 完成后自动触发
   workflow_run:
-    workflows: ["Docker"]
+    workflows: ["Docker", "Sync SGLang Production Tags"]
     types:
       - completed
   # 手动触发
@@ -15,6 +15,7 @@ on:
       - 'images.txt'
       - 'scripts/**'
       - 'pages/**'
+      - 'data/**'
 
 permissions:
   contents: write
@@ -48,6 +49,33 @@ jobs:
         run: |
           chmod +x scripts/collect_versions.sh
           bash scripts/collect_versions.sh
+          
+          # 合并 sglang tags（如果存在）
+          if [ -f data/sglang_tags.json ]; then
+            echo "Merging sglang tags..."
+            python3 -c "
+          import json
+
+          with open('data/versions.json', 'r') as f:
+              data = json.load(f)
+
+          with open('data/sglang_tags.json', 'r') as f:
+              sglang_tags = json.load(f)
+
+          # 去重合并
+          seen = {}
+          for img in data['images'] + sglang_tags:
+              key = (img.get('name'), img.get('namespace', ''), img.get('tag'), img.get('platform', ''))
+              seen[key] = img
+
+          data['images'] = list(seen.values())
+
+          with open('data/versions.json', 'w') as f:
+              json.dump(data, f, indent=2, ensure_ascii=False)
+
+          print(f'Merged: {len(sglang_tags)} sglang tags, total {len(data[\"images\"])} images')
+          "
+          fi
 
       - name: Generate page
         env:

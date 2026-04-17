@@ -99,3 +99,77 @@ jobs:
         if: always()
         run: |
           docker system prune -a -f
+
+      # 8. 保存同步记录供 Pages 使用
+      - name: Save synced tags
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 重新获取本次同步的 tag 列表
+          TAGS=$(curl -s "https://hub.docker.com/v2/repositories/${{ env.SOURCE_REPO }}/tags?page_size=50" | \
+            jq -r '.results[] | .name' | \
+            grep -vx "dev" | \
+            grep -vx "latest" | \
+            grep -v "main" | \
+            grep -v "sha256" | \
+            head -n 30)
+
+          mkdir -p data
+
+          # 生成 sglang_tags.json
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          python3 -c "
+          import json, os, sys
+
+          tags = '''$TAGS'''.strip().split('\n')
+          tags = [t.strip() for t in tags if t.strip()]
+
+          registry = os.environ.get('ACR_REGISTRY', '')
+          namespace = os.environ.get('ACR_NAMESPACE', '')
+          run_id = os.environ.get('GITHUB_RUN_ID', 'manual')
+          timestamp = '$TIMESTAMP'
+
+          records = []
+          for tag in tags:
+              records.append({
+                  'registry': registry,
+                  'namespace': namespace,
+                  'name': 'sglang',
+                  'tag': tag,
+                  'platform': '',
+                  'build_time': timestamp,
+                  'run_id': run_id
+              })
+
+          # 合并已有数据
+          existing = []
+          try:
+              with open('data/sglang_tags.json', 'r') as f:
+                  existing = json.load(f)
+          except:
+              pass
+
+          # 去重: 同 tag 保留最新的
+          seen = {}
+          for item in existing + records:
+              seen[item['tag']] = item
+
+          merged = list(seen.values())
+
+          with open('data/sglang_tags.json', 'w') as f:
+              json.dump(merged, f, indent=2, ensure_ascii=False)
+
+          print(f'Saved {len(records)} new sglang tags, {len(merged)} total')
+          "
+
+          # 提交到仓库
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/sglang_tags.json
+          if git diff --cached --quiet; then
+            echo "No sglang tag changes to commit"
+          else
+            git commit -m "chore: update sglang tags [skip ci]"
+            git push
+          fi
