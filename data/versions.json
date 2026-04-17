@@ -6,8 +6,8 @@
       "name": "aiclient-2-api",
       "tag": "2.13.7",
       "platform": "",
-      "build_time": "2026-04-17T12:38:43Z",
-      "run_id": "24565453070"
+      "build_time": "2026-04-17T12:39:20Z",
+      "run_id": "24565480730"
     },
     {
       "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -703,5 +703,5 @@
       "run_id": "history-import"
     }
   ],
-  "last_updated": "2026-04-17T12:38:43Z"
+  "last_updated": "2026-04-17T12:39:20Z"
 }
