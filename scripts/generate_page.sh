@@ -503,15 +503,29 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
         }
 
         function buildPullCmd(img) {
-            const ns = img.namespace || NAMESPACE;
-            const reg = img.registry || REGISTRY;
-            let fullName = '';
-            if (ns) {
-                fullName = `${reg}/${ns}/${img.name}:${img.tag}`;
-            } else {
-                fullName = `${reg}/${img.name}:${img.tag}`;
+            // docker.yaml 拼接规则:
+            // new_image = $ALIYUN_REGISTRY/$ALIYUN_NAME_SPACE/$platform_prefix$name_space_prefix$image_name_tag
+            //
+            // platform_prefix: linux/amd64 -> linux_amd64_  (有platform时)
+            // name_space_prefix: namespace_  (仅当镜像名跨命名空间重复时)
+            // image_name_tag: name:tag
+
+            let platformPrefix = '';
+            if (img.platform) {
+                platformPrefix = img.platform.replace(/\//g, '_') + '_';
             }
-            return `docker pull ${fullName}`;
+
+            let nsPrefix = '';
+            // 检查是否有同名镜像来自不同命名空间
+            const images = VERSION_DATA.images || [];
+            const sameName = images.filter(i => i.name === img.name);
+            const namespaces = [...new Set(sameName.map(i => i.namespace || ''))];
+            if (namespaces.length > 1 && img.namespace) {
+                nsPrefix = img.namespace + '_';
+            }
+
+            const pullName = `${REGISTRY}/${NAMESPACE}/${platformPrefix}${nsPrefix}${img.name}:${img.tag}`;
+            return `docker pull ${pullName}`;
         }
 
         function renderTable() {
