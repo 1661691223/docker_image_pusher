@@ -196,12 +196,34 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
             }
 
             D = JSON.parse(raw);
+
+            // Save master key for session persistence
+            sessionStorage.setItem('mk', mk);
+            sessionStorage.setItem('u', u);
+
             btn.textContent = 'Login';
             btn.disabled = false;
             ok(u);
         }
 
-        function ok(u){sessionStorage.setItem('s','1');sessionStorage.setItem('u',u);document.getElementById('overlay').classList.add('hidden');document.getElementById('main').classList.remove('hidden');document.getElementById('cur').textContent=u;render()}
+        // Auto-decrypt on page load if master key exists
+        async function autoDecrypt(){
+            const mk = sessionStorage.getItem('mk');
+            const u = sessionStorage.getItem('u');
+            if(!mk || !u) return false;
+
+            const mkKey = await pbkdf2(mk, CFG.salt, 'decrypt');
+            const raw = await aesDecrypt(mkKey, CFG.iv, CFG.data);
+            if(!raw){
+                sessionStorage.removeItem('mk');
+                return false;
+            }
+
+            D = JSON.parse(raw);
+            return true;
+        }
+
+        function ok(u){sessionStorage.setItem('u',u);document.getElementById('overlay').classList.add('hidden');document.getElementById('main').classList.remove('hidden');document.getElementById('cur').textContent=u;render()}
         function logout(){sessionStorage.clear();D=null;document.getElementById('overlay').classList.remove('hidden');document.getElementById('main').classList.add('hidden');document.getElementById('loginForm').reset();}
         function show(m){const e=document.getElementById('err');e.textContent=m;e.style.display='block';setTimeout(()=>e.style.display='none',3000)}
 
@@ -228,7 +250,17 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
         }
         function e(s){const d=document.createElement('div');d.textContent=s;return d.innerHTML}
         function cp(el){navigator.clipboard.writeText(el.textContent).then(()=>{el.classList.add('ok');const o=el.textContent;el.textContent='✓ Copied!';setTimeout(()=>{el.textContent=o;el.classList.remove('ok')},1500)})}
-        document.addEventListener('DOMContentLoaded',()=>{document.getElementById('q').addEventListener('input',render);document.getElementById('pass').addEventListener('keydown',e=>{if(e.key==='Enter')login()});document.getElementById('user').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('pass').focus()})});
+        document.addEventListener('DOMContentLoaded', async ()=>{
+            // Try auto-login with saved master key
+            if(await autoDecrypt()){
+                const u = sessionStorage.getItem('u');
+                document.getElementById('overlay').classList.add('hidden');
+                document.getElementById('main').classList.remove('hidden');
+                document.getElementById('cur').textContent = u;
+                render();
+            }
+            document.getElementById('q').addEventListener('input',render);
+        });
     </script>
 </body>
 </html>
