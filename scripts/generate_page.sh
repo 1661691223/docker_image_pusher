@@ -130,7 +130,7 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
 
         function b64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
         async function dk(pw,salt){const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);return crypto.subtle.deriveKey({name:'PBKDF2',salt:b64(salt),iterations:100000,hash:'SHA-256'},k,{name:'AES-GCM',length:256},false,['decrypt'])}
-        async function dec(pw,iv,ct){try{const k=await dk(pw,CFG.salt);const d=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(iv)},k,b64(ct));return new TextDecoder().decode(d)}catch{return null}}
+        async function dec(pw,salt,iv,ct){try{const k=await dk(pw,salt);const d=await crypto.subtle.decrypt({name:'AES-GCM',iv:b64(iv)},k,b64(ct));return new TextDecoder().decode(d)}catch{return null}}
         async function sha(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return Array.from(new Uint8Array(b)).map(x=>x.toString(16).padStart(2,'0')).join('')}
 
         async function login(){
@@ -148,11 +148,11 @@ cat > "$OUTPUT_FILE" << 'HTMLEOF'
             if(h!==udata.hash){btn.textContent='Login';btn.disabled=false;show('Invalid username or password');return}
 
             // Decrypt master key with user's password
-            const mk=await dec(p, udata.iv, udata.mk);
+            const mk=await dec(p, udata.salt, udata.iv, udata.mk);
             if(!mk){btn.textContent='Login';btn.disabled=false;show('Decryption failed');return}
 
             // Decrypt data with master key
-            const raw=await dec(mk, CFG.iv, CFG.data);
+            const raw=await dec(mk, CFG.salt, CFG.iv, CFG.data);
             if(!raw){btn.textContent='Login';btn.disabled=false;show('Data decryption failed');return}
 
             D=JSON.parse(raw);
