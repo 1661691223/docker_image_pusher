@@ -16,7 +16,6 @@ jobs:
   sync-tags:
     runs-on: ubuntu-latest
     steps:
-      # 1. 前置处理：极限清理磁盘空间（腾出约 30GB+）
       - name: Maximize Build Space
         uses: jlumbroso/free-disk-space@main
         with:
@@ -28,7 +27,14 @@ jobs:
           docker-images: true
           swap-storage: true
 
-      # 2. 登录 ACR
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 获取完整历史以便处理 tags
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
       - name: Login to ACR
         uses: docker/login-action@v3
         with:
@@ -36,7 +42,6 @@ jobs:
           username: ${{ secrets.ALIYUN_REGISTRY_USER }}
           password: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
 
-      # 3. 精确获取、过滤并同步镜像
       - name: Fetch Tags and Sync
         run: |
           # 逻辑说明：
