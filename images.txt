@@ -41,5 +41,5 @@
 #lmsysorg/sglang:gemma4
 #lmsysorg/sglang:v0.5.10.post1
 #justlikemaki/aiclient-2-api:2.13.7
-mysql:5.7mysql:5.7
+mysql:5.7
 amd64/php:8.2.30-apache
