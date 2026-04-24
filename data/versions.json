@@ -6,8 +6,8 @@
       "name": "php",
       "tag": "8.2.30-apache",
       "platform": "",
-      "build_time": "2026-04-24T05:30:11Z",
-      "run_id": "24873908955"
+      "build_time": "2026-04-24T05:32:10Z",
+      "run_id": "24873963786"
     },
     {
       "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -829,5 +829,5 @@
       "run_id": "24864809833"
     }
   ],
-  "last_updated": "2026-04-24T05:30:11Z"
+  "last_updated": "2026-04-24T05:32:10Z"
 }
