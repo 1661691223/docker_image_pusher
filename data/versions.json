@@ -2,12 +2,12 @@
   "images": [
     {
       "registry": "docker.io",
-      "namespace": "justlikemaki",
-      "name": "aiclient-2-api",
-      "tag": "2.13.7",
+      "namespace": "amd64",
+      "name": "php",
+      "tag": "8.2.30-apache",
       "platform": "",
-      "build_time": "2026-04-23T23:59:33Z",
-      "run_id": "24864945646"
+      "build_time": "2026-04-24T05:25:55Z",
+      "run_id": "24873787853"
     },
     {
       "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -829,5 +829,5 @@
       "run_id": "24864809833"
     }
   ],
-  "last_updated": "2026-04-23T23:59:33Z"
+  "last_updated": "2026-04-24T05:25:55Z"
 }
