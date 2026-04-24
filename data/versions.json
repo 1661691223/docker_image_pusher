@@ -6,8 +6,8 @@
       "name": "lamp",
       "tag": "latest-1804",
       "platform": "",
-      "build_time": "2026-04-24T05:44:57Z",
-      "run_id": "24874329150"
+      "build_time": "2026-04-24T05:46:34Z",
+      "run_id": "24874376229"
     },
     {
       "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -829,5 +829,5 @@
       "run_id": "24864809833"
     }
   ],
-  "last_updated": "2026-04-24T05:44:57Z"
+  "last_updated": "2026-04-24T05:46:34Z"
 }
