@@ -581,8 +581,8 @@
     "name": "sglang",
     "tag": "dev-cu13",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -851,8 +851,8 @@
     "name": "sglang",
     "tag": "deepseek-v4-hopper",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1220,8 +1220,8 @@
     "name": "sglang",
     "tag": "dev-cu12",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1472,8 +1472,8 @@
     "name": "sglang",
     "tag": "nightly-dev-cu13-20260510-c7f674e4",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1481,8 +1481,8 @@
     "name": "sglang",
     "tag": "nightly-dev-20260510-c7f674e4",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1490,8 +1490,8 @@
     "name": "sglang",
     "tag": "nightly-dev-cu12-20260510-c7f674e4",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1526,8 +1526,8 @@
     "name": "sglang",
     "tag": "dev-cu13-minicpm-v-4-6",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1535,8 +1535,8 @@
     "name": "sglang",
     "tag": "dev-minicpm-v-4-6",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1544,8 +1544,8 @@
     "name": "sglang",
     "tag": "dev-cu12-minicpm-v-4-6",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1553,8 +1553,8 @@
     "name": "sglang",
     "tag": "nightly-dev-cu13-20260510-2473659e",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1562,8 +1562,8 @@
     "name": "sglang",
     "tag": "nightly-dev-20260510-2473659e",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1571,8 +1571,8 @@
     "name": "sglang",
     "tag": "nightly-dev-cu12-20260510-2473659e",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1580,8 +1580,8 @@
     "name": "sglang",
     "tag": "nightly-dev-cu13-20260511-044bb88a",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1589,8 +1589,8 @@
     "name": "sglang",
     "tag": "nightly-dev-20260511-044bb88a",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1598,8 +1598,8 @@
     "name": "sglang",
     "tag": "nightly-dev-cu12-20260511-044bb88a",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1607,8 +1607,8 @@
     "name": "sglang",
     "tag": "nightly-dev-cu13-20260511-8acb0270",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1616,8 +1616,8 @@
     "name": "sglang",
     "tag": "nightly-dev-20260511-8acb0270",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1625,8 +1625,8 @@
     "name": "sglang",
     "tag": "nightly-dev-cu12-20260511-8acb0270",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1634,8 +1634,8 @@
     "name": "sglang",
     "tag": "nightly-dev-cu13-20260512-8d27ce73",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1643,8 +1643,8 @@
     "name": "sglang",
     "tag": "nightly-dev-20260512-8d27ce73",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1652,8 +1652,8 @@
     "name": "sglang",
     "tag": "nightly-dev-cu12-20260512-8d27ce73",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1661,8 +1661,8 @@
     "name": "sglang",
     "tag": "nightly-dev-cu13-20260513-4fb40bff",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1670,8 +1670,8 @@
     "name": "sglang",
     "tag": "nightly-dev-20260513-4fb40bff",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1679,8 +1679,8 @@
     "name": "sglang",
     "tag": "nightly-dev-cu12-20260513-4fb40bff",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1688,8 +1688,8 @@
     "name": "sglang",
     "tag": "nightly-dev-cu13-20260514-f7efff32",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1697,8 +1697,8 @@
     "name": "sglang",
     "tag": "nightly-dev-20260514-f7efff32",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1706,7 +1706,34 @@
     "name": "sglang",
     "tag": "nightly-dev-cu12-20260514-f7efff32",
     "platform": "",
-    "build_time": "2026-05-16T00:03:06Z",
-    "run_id": "25947111873"
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "publicdr",
+    "name": "sglang",
+    "tag": "nightly-dev-cu13-20260516-d523ae12",
+    "platform": "",
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "publicdr",
+    "name": "sglang",
+    "tag": "nightly-dev-20260516-d523ae12",
+    "platform": "",
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "publicdr",
+    "name": "sglang",
+    "tag": "nightly-dev-cu12-20260516-d523ae12",
+    "platform": "",
+    "build_time": "2026-05-16T09:33:53Z",
+    "run_id": "25957797904"
   }
 ]
