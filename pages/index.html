@@ -267,7 +267,7 @@
             i.sort((a,b)=>{let va=(a[cs.k]||'').toLowerCase(),vb=(b[cs.k]||'').toLowerCase();return va<vb?(cs.a?-1:1):va>vb?(cs.a?1:-1):0});
             return i;
         }
-        function cmd(i){let pp=i.platform?i.platform.replace(/\//g,'_')+'_':'';let np='';const all=D.images||[];const s=all.filter(x=>x.name===i.name);const ns=[...new Set(s.map(x=>x.namespace||''))];if(ns.length>1&&i.namespace)np=i.namespace+'_';return`docker pull ${D.registry}/${D.namespace}/${pp}${np}${i.name}:${i.tag}`}
+        function cmd(i){return`docker pull ${D.registry}/${D.namespace}/${i.name}:${i.tag}`}
         function render(){
             const i=imgs();const tb=document.getElementById('tb');const em=document.getElementById('emp');
             document.getElementById('s1').textContent=i.length;
