@@ -2,12 +2,12 @@
   "images": [
     {
       "registry": "docker.io",
-      "namespace": "mattrayner",
-      "name": "lamp",
-      "tag": "latest-1804",
+      "namespace": "minio",
+      "name": "minio",
+      "tag": "RELEASE.2021-06-17T00-10-46Z",
       "platform": "",
-      "build_time": "2026-05-18T00:06:37Z",
-      "run_id": "26006662785"
+      "build_time": "2026-05-18T06:38:43Z",
+      "run_id": "26017674747"
     },
     {
       "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1891,5 +1891,5 @@
       "run_id": "26006578590"
     }
   ],
-  "last_updated": "2026-05-18T00:06:37Z"
+  "last_updated": "2026-05-18T06:38:43Z"
 }
