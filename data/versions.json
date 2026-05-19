@@ -2,12 +2,12 @@
   "images": [
     {
       "registry": "docker.io",
-      "namespace": "minio",
-      "name": "minio",
-      "tag": "RELEASE.2021-06-17T00-10-46Z",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.19.1",
       "platform": "",
-      "build_time": "2026-05-19T00:30:57Z",
-      "run_id": "26068650382"
+      "build_time": "2026-05-19T05:47:13Z",
+      "run_id": "26078825807"
     },
     {
       "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1927,5 +1927,5 @@
       "run_id": "26068090678"
     }
   ],
-  "last_updated": "2026-05-19T00:30:57Z"
+  "last_updated": "2026-05-19T05:47:13Z"
 }
