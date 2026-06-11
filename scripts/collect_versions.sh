@@ -64,6 +64,35 @@ parse_image_line() {
     echo "$registry|$name_space|$image_name|$tag|$platform"
 }
 
+# 检查记录是否已存在于 versions.json
+record_exists() {
+    local name="$1"
+    local ns="$2"
+    local tag="$3"
+    local plat="$4"
+
+    if command -v jq &>/dev/null; then
+        local count
+        count=$(jq --arg name "$name" --arg ns "$ns" --arg tag "$tag" --arg plat "$plat" \
+            '[.images[] | select(.name == $name and .namespace == $ns and .tag == $tag and .platform == $plat)] | length' \
+            "$VERSIONS_FILE" 2>/dev/null || echo "0")
+        [ "$count" -gt 0 ]
+    else
+        python3 -c "
+import json
+with open('$VERSIONS_FILE', 'r') as f:
+    data = json.load(f)
+for img in data.get('images', []):
+    if (img.get('name') == '$name' and
+        img.get('namespace', '') == '$ns' and
+        img.get('tag') == '$tag' and
+        img.get('platform', '') == '$plat'):
+        print('EXISTS')
+        break
+" | grep -q EXISTS
+    fi
+}
+
 # 添加一条记录到 versions.json
 add_record() {
     local registry="$1"
@@ -84,13 +113,10 @@ add_record() {
            --arg time "$build_time" \
            --arg run_id "$build_run_id" \
            '
-           # 查找是否已存在相同的镜像
-           .images |= (
-               map(
-                   select(.name == $name and .namespace == $ns) | .
-               )
-           ) |
-           # 添加新版本记录
+           # 移除旧记录（相同 name+namespace+tag+platform），然后追加新记录
+           .images |= map(select(
+               .name != $name or .namespace != $ns or .tag != $tag or .platform != $plat
+           )) |
            .images += [{
                registry: $reg,
                namespace: $ns,
@@ -100,11 +126,6 @@ add_record() {
                build_time: $time,
                run_id: $run_id
            }] |
-           # 去重: 同名同tag同platform只保留最新的
-           .images = (
-               .images | group_by(.name, .namespace, .tag, .platform) |
-               map(sort_by(.build_time) | last)
-           ) |
            .last_updated = $time
            ' "$VERSIONS_FILE" > "$VERSIONS_FILE.tmp" && mv "$VERSIONS_FILE.tmp" "$VERSIONS_FILE"
     else
@@ -211,11 +232,15 @@ while IFS= read -r line || [ -n "$line" ]; do
     echo "$line" | grep -q '^\s*#' && continue
     
     echo "Processing: $line"
-    
+
     parsed=$(parse_image_line "$line")
     IFS='|' read -r registry namespace image_name tag platform <<< "$parsed"
-    
-    add_record "$registry" "$namespace" "$image_name" "$tag" "$platform" "$BUILD_TIME" "$BUILD_RUN_ID"
+
+    if record_exists "$image_name" "$namespace" "$tag" "$platform"; then
+        echo "  -> Already exists in versions.json, skipping."
+    else
+        add_record "$registry" "$namespace" "$image_name" "$tag" "$platform" "$BUILD_TIME" "$BUILD_RUN_ID"
+    fi
     
 done < "$IMAGES_FILE"
 
