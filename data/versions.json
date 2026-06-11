@@ -2834,7 +2834,79 @@
       "platform": "",
       "build_time": "2026-06-11T00:28:13Z",
       "run_id": "27315222328"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.17.1",
+      "platform": "",
+      "build_time": "2026-06-11T07:23:45Z",
+      "run_id": "27330819053"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.17.0",
+      "platform": "",
+      "build_time": "2026-06-11T07:23:45Z",
+      "run_id": "27330819053"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.18.1",
+      "platform": "",
+      "build_time": "2026-06-11T07:23:45Z",
+      "run_id": "27330819053"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.18.0",
+      "platform": "",
+      "build_time": "2026-06-11T07:23:45Z",
+      "run_id": "27330819053"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.19.0",
+      "platform": "",
+      "build_time": "2026-06-11T07:23:45Z",
+      "run_id": "27330819053"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.20.2",
+      "platform": "",
+      "build_time": "2026-06-11T07:23:45Z",
+      "run_id": "27330819053"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.20.1",
+      "platform": "",
+      "build_time": "2026-06-11T07:23:45Z",
+      "run_id": "27330819053"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.20.0",
+      "platform": "",
+      "build_time": "2026-06-11T07:23:45Z",
+      "run_id": "27330819053"
     }
   ],
-  "last_updated": "2026-06-11T05:55:35Z"
+  "last_updated": "2026-06-11T07:23:45Z"
 }
