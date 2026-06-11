@@ -26,7 +26,7 @@ jobs:
             filter_cmd: "grep -vx dev | grep -vx latest | grep -v main | grep -v sha256"
           - name: vllm
             source_repo: vllm/vllm-openai
-            target_name: vllm
+            target_name: vllm-openai
             # vLLM 严格匹配 vX.Y.Z 纯发布版，排除 -cu130 / -rc / -dev 等
             filter_cmd: "grep -E '^v[0-9]+\\.[0-9]+\\.[0-9]+$'"
 
