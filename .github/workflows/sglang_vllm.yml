@@ -135,7 +135,8 @@ jobs:
           tags = [t.strip() for t in tags if t.strip()]
 
           registry = os.environ.get('ACR_REGISTRY', '')
-          namespace = os.environ.get('ACR_NAMESPACE', '')
+          source_repo = os.environ.get('SOURCE_REPO', '')
+          namespace = source_repo.split('/')[0] if '/' in source_repo else ''
           target_name = os.environ.get('TARGET_NAME', '')
           run_id = os.environ.get('GITHUB_RUN_ID', 'manual')
           timestamp = '$TIMESTAMP'
