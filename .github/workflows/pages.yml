@@ -3,7 +3,7 @@ name: Docker Pages
 on:
   # 在 Docker 或 SGLang workflow 完成后自动触发
   workflow_run:
-    workflows: ["Docker", "Sync SGLang Production Tags"]
+    workflows: ["Docker", "Sync Production Tags (SGLang & vLLM)"]
     types:
       - completed
   # 手动触发
