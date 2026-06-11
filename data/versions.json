@@ -6,8 +6,8 @@
       "name": "vllm-openai",
       "tag": "v0.19.1",
       "platform": "",
-      "build_time": "2026-06-11T00:28:37Z",
-      "run_id": "27315426443"
+      "build_time": "2026-06-11T05:36:54Z",
+      "run_id": "27326248338"
     },
     {
       "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -2836,5 +2836,5 @@
       "run_id": "27315222328"
     }
   ],
-  "last_updated": "2026-06-11T00:28:37Z"
+  "last_updated": "2026-06-11T05:36:54Z"
 }
