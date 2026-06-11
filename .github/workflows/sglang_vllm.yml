@@ -1,0 +1,188 @@
+name: Sync Production Tags (SGLang & vLLM)
+
+on:
+  schedule:
+    - cron: '0 7,15,23 * * *'
+    # 对应北京时间 15:00 23:00 07:00
+  workflow_dispatch:
+
+env:
+  ACR_REGISTRY: "${{ secrets.ALIYUN_REGISTRY }}"
+  ACR_NAMESPACE: "${{ secrets.ALIYUN_NAME_SPACE }}"
+  DOCKER_CLI_EXPERIMENTAL: enabled
+
+jobs:
+  sync-tags:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: sglang
+            source_repo: lmsysorg/sglang
+            target_name: sglang
+            # SGLang 原有过滤逻辑保持不变
+            filter_cmd: |
+              grep -vx "dev" | \
+              grep -vx "latest" | \
+              grep -v "main" | \
+              grep -v "sha256"
+          - name: vllm
+            source_repo: vllm/vllm-openai
+            target_name: vllm
+            # vLLM 严格匹配 vX.Y.Z 纯发布版，排除 -cu130 / -rc / -dev 等
+            filter_cmd: |
+              grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$'
+
+    steps:
+      - name: Maximize Build Space
+        uses: jlumbroso/free-disk-space@main
+        with:
+          tool-cache: false
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Login to ACR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.ACR_REGISTRY }}
+          username: ${{ secrets.ALIYUN_REGISTRY_USER }}
+          password: ${{ secrets.ALIYUN_REGISTRY_PASSWORD }}
+
+      - name: Fetch Tags and Sync (${{ matrix.name }})
+        env:
+          SOURCE_REPO: ${{ matrix.source_repo }}
+          TARGET_NAME: ${{ matrix.target_name }}
+        run: |
+          TAGS=$(curl -s "https://hub.docker.com/v2/repositories/${SOURCE_REPO}/tags?page_size=100" | \
+            jq -r '.results[] | .name' | \
+            ${{ matrix.filter_cmd }} | \
+            head -n 30)
+
+          echo "=== [${TARGET_NAME}] Checked and filtered tags ==="
+          echo "$TAGS"
+          echo "=========================================="
+
+          if [ -z "$TAGS" ]; then
+            echo "No valid tags found for ${TARGET_NAME}. Exiting."
+            exit 0
+          fi
+
+          for TAG in $TAGS; do
+            SOURCE_IMAGE="${SOURCE_REPO}:${TAG}"
+            TARGET_IMAGE="${{ env.ACR_REGISTRY }}/${{ env.ACR_NAMESPACE }}/${TARGET_NAME}:${TAG}"
+
+            echo "------------------------------------------"
+            echo "[${TARGET_NAME}] Checking: $TARGET_IMAGE"
+
+            if docker manifest inspect "$TARGET_IMAGE" > /dev/null 2>&1; then
+              echo "✅ ${TAG} already exists in ACR, skipping."
+              continue
+            fi
+
+            echo "🚀 Syncing $SOURCE_IMAGE ..."
+
+            if docker pull "$SOURCE_IMAGE"; then
+              docker tag "$SOURCE_IMAGE" "$TARGET_IMAGE"
+              docker push "$TARGET_IMAGE"
+              echo "🎉 ${TAG} synced successfully!"
+            else
+              echo "❌ Failed to pull $SOURCE_IMAGE, skipping."
+              continue
+            fi
+
+            docker rmi -f "$SOURCE_IMAGE" "$TARGET_IMAGE"
+            docker system prune -f
+
+            echo "Current Disk Usage:"
+            df -h /
+          done
+
+      - name: Final Cleanup
+        if: always()
+        run: docker system prune -a -f
+
+      - name: Save synced tags (${{ matrix.name }})
+        if: always()
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SOURCE_REPO: ${{ matrix.source_repo }}
+          TARGET_NAME: ${{ matrix.target_name }}
+        run: |
+          TAGS=$(curl -s "https://hub.docker.com/v2/repositories/${SOURCE_REPO}/tags?page_size=50" | \
+            jq -r '.results[] | .name' | \
+            ${{ matrix.filter_cmd }} | \
+            head -n 30)
+
+          mkdir -p data
+          JSON_FILE="data/${TARGET_NAME}_tags.json"
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          python3 -c "
+          import json, os
+
+          tags = '''$TAGS'''.strip().split('\n')
+          tags = [t.strip() for t in tags if t.strip()]
+
+          registry = os.environ.get('ACR_REGISTRY', '')
+          namespace = os.environ.get('ACR_NAMESPACE', '')
+          target_name = os.environ.get('TARGET_NAME', '')
+          run_id = os.environ.get('GITHUB_RUN_ID', 'manual')
+          timestamp = '$TIMESTAMP'
+          json_file = '$JSON_FILE'
+
+          records = []
+          for tag in tags:
+              records.append({
+                  'registry': registry,
+                  'namespace': namespace,
+                  'name': target_name,
+                  'tag': tag,
+                  'platform': '',
+                  'build_time': timestamp,
+                  'run_id': run_id
+              })
+
+          existing = []
+          try:
+              with open(json_file, 'r') as f:
+                  existing = json.load(f)
+          except Exception:
+              pass
+
+          seen = {}
+          for item in existing + records:
+              seen[item['tag']] = item
+
+          merged = list(seen.values())
+
+          with open(json_file, 'w') as f:
+              json.dump(merged, f, indent=2, ensure_ascii=False)
+
+          print(f'Saved {len(records)} new {target_name} tags, {len(merged)} total to {json_file}')
+          "
+
+          git add "$JSON_FILE"
+          if git diff --cached --quiet; then
+            echo "No ${TARGET_NAME} tag changes to commit"
+          else
+            git commit -m "chore: update ${TARGET_NAME} tags [skip ci]"
+            # 推送前 rebase 远端最新提交，防止并发矩阵任务导致非快进推送失败
+            git pull --rebase origin main
+            git push
+          fi
+
