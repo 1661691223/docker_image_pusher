@@ -179,7 +179,13 @@ jobs:
           else
             git commit -m "chore: update ${TARGET_NAME} tags [skip ci]"
             # 推送前 rebase 远端最新提交，防止并发矩阵任务导致非快进推送失败
-            git pull --rebase origin main
+            git fetch origin main
+            if ! git rebase origin/main; then
+              echo "Rebase conflict, using our freshly-generated tag data..."
+              git checkout --ours "$JSON_FILE"
+              git add "$JSON_FILE"
+              git rebase --continue
+            fi
             git push
           fi
 
