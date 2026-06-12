@@ -51,32 +51,32 @@ jobs:
           chmod +x scripts/collect_versions.sh
           bash scripts/collect_versions.sh
           
-          # 合并 sglang tags（如果存在）
-          if [ -f data/sglang_tags.json ]; then
-            echo "Merging sglang tags..."
-            python3 -c "
-          import json
+          # 合并 sglang/vllm tags（如果存在）
+          python3 -c "
+          import json, os, glob
 
           with open('data/versions.json', 'r') as f:
               data = json.load(f)
 
-          with open('data/sglang_tags.json', 'r') as f:
-              sglang_tags = json.load(f)
+          tag_files = glob.glob('data/*_tags.json')
+          for tf in tag_files:
+              with open(tf, 'r') as f:
+                  tags = json.load(f)
+              data['images'].extend(tags)
+              print(f'Merged {len(tags)} tags from {tf}')
 
-          # 去重合并
+          # 去重: name + namespace + tag + platform 唯一
           seen = {}
-          for img in data['images'] + sglang_tags:
+          for img in data['images']:
               key = (img.get('name'), img.get('namespace', ''), img.get('tag'), img.get('platform', ''))
               seen[key] = img
-
           data['images'] = list(seen.values())
 
           with open('data/versions.json', 'w') as f:
               json.dump(data, f, indent=2, ensure_ascii=False)
 
-          print(f'Merged: {len(sglang_tags)} sglang tags, total {len(data[\"images\"])} images')
+          print(f'Total images after merge: {len(data[\"images\"])}')
           "
-          fi
 
       - name: Generate page
         env:
