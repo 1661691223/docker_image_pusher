@@ -154,12 +154,12 @@
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "latest-runtime",
     "platform": "",
-    "build_time": "2026-05-27T18:11:49Z",
-    "run_id": "26529495672"
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -172,12 +172,12 @@
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "latest-cu130-runtime",
     "platform": "",
-    "build_time": "2026-05-28T00:47:03Z",
-    "run_id": "26546184220"
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -280,12 +280,12 @@
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "latest-cu130",
     "platform": "",
-    "build_time": "2026-05-29T00:19:53Z",
-    "run_id": "26610060681"
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -577,12 +577,12 @@
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "dev-cu13",
     "platform": "",
-    "build_time": "2026-06-11T07:59:51Z",
-    "run_id": "27327366140"
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1108,12 +1108,12 @@
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "latest-cu129",
     "platform": "",
-    "build_time": "2026-05-30T00:17:40Z",
-    "run_id": "26668783815"
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1216,12 +1216,12 @@
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "dev-cu12",
     "platform": "",
-    "build_time": "2026-06-11T07:59:51Z",
-    "run_id": "27327366140"
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -1297,12 +1297,12 @@
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "latest-cu129-runtime",
     "platform": "",
-    "build_time": "2026-05-28T11:47:39Z",
-    "run_id": "26570633049"
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -2746,110 +2746,227 @@
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "nightly-dev-cu13-20260608-303757cc",
     "platform": "",
-    "build_time": "2026-06-11T07:59:51Z",
-    "run_id": "27327366140"
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "nightly-dev-20260608-303757cc",
     "platform": "",
-    "build_time": "2026-06-11T07:59:51Z",
-    "run_id": "27327366140"
+    "build_time": "2026-06-11T12:07:26Z",
+    "run_id": "27339489519"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "nightly-dev-cu12-20260608-303757cc",
     "platform": "",
-    "build_time": "2026-06-11T07:59:51Z",
-    "run_id": "27327366140"
+    "build_time": "2026-06-11T12:07:26Z",
+    "run_id": "27339489519"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "nightly-dev-cu13-20260609-317fc6a9",
     "platform": "",
-    "build_time": "2026-06-11T07:59:51Z",
-    "run_id": "27327366140"
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "nightly-dev-20260609-317fc6a9",
     "platform": "",
-    "build_time": "2026-06-11T07:59:51Z",
-    "run_id": "27327366140"
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "nightly-dev-cu12-20260609-317fc6a9",
     "platform": "",
-    "build_time": "2026-06-11T07:59:51Z",
-    "run_id": "27327366140"
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "nightly-dev-cu13-20260610-f332e526",
     "platform": "",
-    "build_time": "2026-06-11T07:59:51Z",
-    "run_id": "27327366140"
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "nightly-dev-20260610-f332e526",
     "platform": "",
-    "build_time": "2026-06-11T07:59:51Z",
-    "run_id": "27327366140"
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "nightly-dev-cu12-20260610-f332e526",
     "platform": "",
-    "build_time": "2026-06-11T07:59:51Z",
-    "run_id": "27327366140"
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "nightly-dev-cu13-20260611-99ab90c5",
     "platform": "",
-    "build_time": "2026-06-11T07:59:51Z",
-    "run_id": "27327366140"
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "nightly-dev-20260611-99ab90c5",
     "platform": "",
-    "build_time": "2026-06-11T07:59:51Z",
-    "run_id": "27327366140"
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
-    "namespace": "publicdr",
+    "namespace": "lmsysorg",
     "name": "sglang",
     "tag": "nightly-dev-cu12-20260611-99ab90c5",
     "platform": "",
-    "build_time": "2026-06-11T07:59:51Z",
-    "run_id": "27327366140"
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "v0.5.13-rocm700-mi35x",
+    "platform": "",
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "v0.5.13-cu129",
+    "platform": "",
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "v0.5.13-cu130",
+    "platform": "",
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "v0.5.13",
+    "platform": "",
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "v0.5.13-rocm700-mi30x",
+    "platform": "",
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "v0.5.13-cu129-runtime",
+    "platform": "",
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "v0.5.13-cu130-runtime",
+    "platform": "",
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "v0.5.13-runtime",
+    "platform": "",
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "v0.5.13-cann9.0.0-910b",
+    "platform": "",
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "v0.5.13-cann9.0.0-a3",
+    "platform": "",
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "v0.5.13-xeon",
+    "platform": "",
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "v0.5.13-rocm720-mi30x",
+    "platform": "",
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "v0.5.13-rocm720-mi35x",
+    "platform": "",
+    "build_time": "2026-06-12T00:27:32Z",
+    "run_id": "27386135472"
   }
 ]
