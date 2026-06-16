@@ -5,8 +5,8 @@
     "name": "vllm-openai",
     "tag": "v0.22.1",
     "platform": "",
-    "build_time": "2026-06-16T12:19:27Z",
-    "run_id": "27616930720"
+    "build_time": "2026-06-16T18:59:23Z",
+    "run_id": "27640792698"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -14,8 +14,8 @@
     "name": "vllm-openai",
     "tag": "v0.22.0",
     "platform": "",
-    "build_time": "2026-06-16T12:19:27Z",
-    "run_id": "27616930720"
+    "build_time": "2026-06-16T18:59:23Z",
+    "run_id": "27640792698"
   },
   {
     "registry": "registry.cn-hangzhou.aliyuncs.com",
@@ -32,7 +32,7 @@
     "name": "vllm-openai",
     "tag": "v0.23.0",
     "platform": "",
-    "build_time": "2026-06-16T12:19:27Z",
-    "run_id": "27616930720"
+    "build_time": "2026-06-16T18:59:23Z",
+    "run_id": "27640792698"
   }
 ]
