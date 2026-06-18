@@ -94,6 +94,7 @@ jobs:
           FAILURE_COUNT=0
           SKIP_COUNT=0
           SYNC_RESULT=""
+          SUCCESS_LINES=""
           while IFS= read -r line || [ -n "$line" ]; do
               [[ -z "$line" ]] && continue
               if echo "$line" | grep -q '^\s*#'; then
@@ -148,6 +149,8 @@ jobs:
                   SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
                   SYNC_RESULT="${SYNC_RESULT}- ✅ ${new_image##*/}
           "
+                  SUCCESS_LINES="${SUCCESS_LINES}${line}
+          "
               else
                   FAILURE_COUNT=$((FAILURE_COUNT + 1))
                   SYNC_RESULT="${SYNC_RESULT}- ❌ ${line}: pull failed
@@ -166,6 +169,11 @@ jobs:
               df -hT
               echo "=============================================================================="
           done < images.txt
+
+          # 保存成功同步的镜像行，供 pages workflow 收集版本用
+          if [ -n "$SUCCESS_LINES" ]; then
+            echo "$SUCCESS_LINES" > /tmp/successful_syncs.txt
+          fi
 
           echo "SUCCESS_COUNT=$SUCCESS_COUNT" >> $GITHUB_ENV
           echo "FAILURE_COUNT=$FAILURE_COUNT" >> $GITHUB_ENV
@@ -206,4 +214,12 @@ jobs:
             '{"msgtype":"markdown","markdown":{"title":$title,"text":$text}}')
           curl -s -X POST -H "Content-Type: application/json;charset=utf-8" \
             -d "$JSON_PAYLOAD" "${{ secrets.WEBHOOK_URL }}"
+
+      - name: Upload sync result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: successful-syncs
+          path: /tmp/successful_syncs.txt
+          retention-days: 1
 

@@ -42,13 +42,29 @@ jobs:
           sudo apt-get update && sudo apt-get install -y jq
           pip install cryptography
 
+      - name: Download sync result from triggering workflow
+        if: github.event_name == 'workflow_run'
+        uses: actions/download-artifact@v4
+        with:
+          name: successful-syncs
+          path: /tmp/
+          run-id: ${{ github.event.workflow_run.id }}
+        continue-on-error: true
+
       - name: Collect version data
         env:
           ALIYUN_REGISTRY: ${{ secrets.ALIYUN_REGISTRY }}
           ALIYUN_NAME_SPACE: ${{ secrets.ALIYUN_NAME_SPACE }}
         run: |
           chmod +x scripts/collect_versions.sh
-          bash scripts/collect_versions.sh
+
+          # 优先使用 docker/sglang 同步成功列表，失败或跳过的镜像不收集
+          if [ -f /tmp/successful_syncs.txt ] && [ -s /tmp/successful_syncs.txt ]; then
+            echo "Using successful sync list from artifact"
+            bash scripts/collect_versions.sh --file /tmp/successful_syncs.txt
+          else
+            bash scripts/collect_versions.sh
+          fi
           
           # 合并 sglang/vllm tags（如果存在）
           python3 -c "

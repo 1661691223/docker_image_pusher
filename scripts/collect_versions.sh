@@ -213,15 +213,31 @@ with open('$VERSIONS_FILE', 'w') as f:
 }
 
 # 主逻辑
-if [ "${1:-}" = "--import" ]; then
-    import_history
-    exit 0
-fi
+
+# 解析参数
+INPUT_FILE="$IMAGES_FILE"
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --import)
+            import_history
+            exit 0
+            ;;
+        --file)
+            INPUT_FILE="$2"
+            shift 2
+            ;;
+        *)
+            echo "Unknown option: $1"
+            echo "Usage: $0 [--import] [--file <path>]"
+            exit 1
+            ;;
+    esac
+done
 
 BUILD_TIME=$(get_timestamp)
 BUILD_RUN_ID="${GITHUB_RUN_ID:-manual}"
 
-echo "Collecting image versions from $IMAGES_FILE ..."
+echo "Collecting image versions from $INPUT_FILE ..."
 echo "Build time: $BUILD_TIME"
 echo "Run ID: $BUILD_RUN_ID"
 
@@ -242,7 +258,7 @@ while IFS= read -r line || [ -n "$line" ]; do
         add_record "$registry" "$namespace" "$image_name" "$tag" "$platform" "$BUILD_TIME" "$BUILD_RUN_ID"
     fi
     
-done < "$IMAGES_FILE"
+done < "$INPUT_FILE"
 
 echo ""
 echo "Collection complete. Total images in database: $(cat "$VERSIONS_FILE" | python3 -c 'import json,sys;print(len(json.load(sys.stdin)["images"]))')"
