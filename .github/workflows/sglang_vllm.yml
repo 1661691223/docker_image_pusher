@@ -211,16 +211,22 @@ jobs:
           except Exception:
               pass
 
+          # 保留已有标签的原始 build_time/run_id
           seen = {}
-          for item in existing + records:
+          for item in existing:
               seen[item['tag']] = item
+          new_added = 0
+          for item in records:
+              if item['tag'] not in seen:
+                  seen[item['tag']] = item
+                  new_added += 1
 
           merged = list(seen.values())
 
           with open(json_file, 'w') as f:
               json.dump(merged, f, indent=2, ensure_ascii=False)
 
-          print(f'Saved {len(records)} new {target_name} tags, {len(merged)} total to {json_file}')
+          print(f'Saved {new_added} new {target_name} tags, {len(merged)} total to {json_file}')
           "
 
           git add "$JSON_FILE"
