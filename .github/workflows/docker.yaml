@@ -146,11 +146,11 @@ jobs:
                   docker push $new_image
 
                   SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-                  SYNC_RESULT="${SYNC_RESULT}✅ ${new_image##*/}
+                  SYNC_RESULT="${SYNC_RESULT}- ✅ ${new_image##*/}
           "
               else
                   FAILURE_COUNT=$((FAILURE_COUNT + 1))
-                  SYNC_RESULT="${SYNC_RESULT}❌ ${line}: pull failed
+                  SYNC_RESULT="${SYNC_RESULT}- ❌ ${line}: pull failed
           "
                   echo "❌ Failed to pull $line, skipping."
               fi

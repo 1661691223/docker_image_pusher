@@ -8,11 +8,10 @@ on:
       - completed
   # 手动触发
   workflow_dispatch:
-  # push 到 main 分支时触发（修改 images.txt 或 pages 相关文件）
+  # push 到 main 分支时触发（修改 pages 相关文件，images.txt 由 workflow_run 触发）
   push:
     branches: [main]
     paths:
-      - 'images.txt'
       - 'scripts/**'
       - 'pages/**'
       - 'data/**'
