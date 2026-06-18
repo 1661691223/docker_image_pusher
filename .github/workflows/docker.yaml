@@ -90,6 +90,10 @@ jobs:
           done < images.txt
 
           # ==================== 第二阶段：拉取、预检、推送 ====================
+          SUCCESS_COUNT=0
+          FAILURE_COUNT=0
+          SKIP_COUNT=0
+          SYNC_RESULT=""
           while IFS= read -r line || [ -n "$line" ]; do
               [[ -z "$line" ]] && continue
               if echo "$line" | grep -q '^\s*#'; then
@@ -126,6 +130,7 @@ jobs:
               echo "🔍 Checking if target exists: $new_image"
               if docker manifest inspect "$new_image" > /dev/null 2>&1; then
                   echo "✅ $new_image already exists in ACR, skipping pull/push."
+                  SKIP_COUNT=$((SKIP_COUNT + 1))
                   echo "=========================================="
                   continue
               fi
@@ -133,13 +138,22 @@ jobs:
               # ================================================
 
               echo "docker pull $line"
-              docker pull $line
+              if docker pull $line; then
+                  echo "docker tag $image $new_image"
+                  docker tag $image $new_image
 
-              echo "docker tag $image $new_image"
-              docker tag $image $new_image
+                  echo "docker push $new_image"
+                  docker push $new_image
 
-              echo "docker push $new_image"
-              docker push $new_image
+                  SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
+                  SYNC_RESULT="${SYNC_RESULT}✅ ${new_image##*/}
+          "
+              else
+                  FAILURE_COUNT=$((FAILURE_COUNT + 1))
+                  SYNC_RESULT="${SYNC_RESULT}❌ ${line}: pull failed
+          "
+                  echo "❌ Failed to pull $line, skipping."
+              fi
 
               echo "开始清理磁盘空间"
               echo "=============================================================================="
@@ -152,4 +166,44 @@ jobs:
               df -hT
               echo "=============================================================================="
           done < images.txt
+
+          echo "SUCCESS_COUNT=$SUCCESS_COUNT" >> $GITHUB_ENV
+          echo "FAILURE_COUNT=$FAILURE_COUNT" >> $GITHUB_ENV
+          echo "SKIP_COUNT=$SKIP_COUNT" >> $GITHUB_ENV
+          echo "SYNC_RESULT<<EOF" >> $GITHUB_ENV
+          echo "$SYNC_RESULT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: 钉钉通知
+        if: always()
+        run: |
+          [ -z "${{ secrets.WEBHOOK_URL }}" ] && exit 0
+
+          S_COUNT=${SUCCESS_COUNT:-0}
+          F_COUNT=${FAILURE_COUNT:-0}
+          K_COUNT=${SKIP_COUNT:-0}
+
+          if [ "$F_COUNT" -gt 0 ]; then
+            TITLE="❌ 镜像同步异常"
+            SUMMARY="错误: ${F_COUNT} | 成功: ${S_COUNT} | 跳过: ${K_COUNT}"
+          elif [ "$S_COUNT" -gt 0 ]; then
+            TITLE="✅ 镜像同步完成"
+            SUMMARY="成功: ${S_COUNT} | 跳过: ${K_COUNT}"
+          else
+            TITLE="☕ 无新镜像"
+            SUMMARY="全部跳过: ${K_COUNT}"
+          fi
+
+          DETAIL="${SYNC_RESULT:-}"
+          MARKDOWN="## ${TITLE}
+          > ${SUMMARY}
+
+          ${DETAIL}
+
+          🔗 [查看详情](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+
+          JSON_PAYLOAD=$(jq -n --arg title "$TITLE" --arg text "$MARKDOWN" \
+            '{"msgtype":"markdown","markdown":{"title":$title,"text":$text}}')
+          curl -s -X POST -H "Content-Type: application/json;charset=utf-8" \
+            -d "$JSON_PAYLOAD" "${{ secrets.WEBHOOK_URL }}"
 

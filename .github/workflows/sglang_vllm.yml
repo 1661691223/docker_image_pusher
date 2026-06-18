@@ -75,8 +75,15 @@ jobs:
 
           if [ -z "$TAGS" ]; then
             echo "No valid tags found for ${TARGET_NAME}. Exiting."
+            echo "NEW_COUNT=0" >> $GITHUB_ENV
+            echo "SKIP_COUNT=0" >> $GITHUB_ENV
+            echo "SYNCED_TAGS=" >> $GITHUB_ENV
             exit 0
           fi
+
+          NEW_COUNT=0
+          SKIP_COUNT=0
+          SYNCED_TAGS=""
 
           for TAG in $TAGS; do
             SOURCE_IMAGE="${SOURCE_REPO}:${TAG}"
@@ -87,6 +94,7 @@ jobs:
 
             if docker manifest inspect "$TARGET_IMAGE" > /dev/null 2>&1; then
               echo "✅ ${TAG} already exists in ACR, skipping."
+              SKIP_COUNT=$((SKIP_COUNT + 1))
               continue
             fi
 
@@ -95,6 +103,8 @@ jobs:
             if docker pull "$SOURCE_IMAGE"; then
               docker tag "$SOURCE_IMAGE" "$TARGET_IMAGE"
               docker push "$TARGET_IMAGE"
+              NEW_COUNT=$((NEW_COUNT + 1))
+              SYNCED_TAGS="${SYNCED_TAGS}${TAG} "
               echo "🎉 ${TAG} synced successfully!"
             else
               echo "❌ Failed to pull $SOURCE_IMAGE, skipping."
@@ -107,6 +117,46 @@ jobs:
             echo "Current Disk Usage:"
             df -h /
           done
+
+          echo "NEW_COUNT=$NEW_COUNT" >> $GITHUB_ENV
+          echo "SKIP_COUNT=$SKIP_COUNT" >> $GITHUB_ENV
+          echo "SYNCED_TAGS=$SYNCED_TAGS" >> $GITHUB_ENV
+
+      - name: 钉钉通知
+        if: always()
+        env:
+          NEW_COUNT: ${{ env.NEW_COUNT }}
+          SKIP_COUNT: ${{ env.SKIP_COUNT }}
+          SYNCED_TAGS: ${{ env.SYNCED_TAGS }}
+        run: |
+          [ -z "${{ secrets.WEBHOOK_URL }}" ] && exit 0
+
+          N_COUNT=${NEW_COUNT:-0}
+          K_COUNT=${SKIP_COUNT:-0}
+          TARGET_NAME="${{ matrix.target_name }}"
+
+          if [ "$N_COUNT" -gt 0 ]; then
+            TITLE="✅ ${TARGET_NAME} 同步完成"
+            TAG_LIST="${SYNCED_TAGS:-}"
+            SUMMARY="新增: ${N_COUNT} | 跳过: ${K_COUNT}"
+            DETAIL="**新标签:** ${TAG_LIST}"
+          else
+            TITLE="☕ ${TARGET_NAME} 无新标签"
+            SUMMARY="跳过: ${K_COUNT}"
+            DETAIL="无新标签需要同步"
+          fi
+
+          MARKDOWN="## ${TITLE}
+          > ${SUMMARY}
+
+          ${DETAIL}
+
+          🔗 [查看详情](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+
+          JSON_PAYLOAD=$(jq -n --arg title "$TITLE" --arg text "$MARKDOWN" \
+            '{"msgtype":"markdown","markdown":{"title":$title,"text":$text}}')
+          curl -s -X POST -H "Content-Type: application/json;charset=utf-8" \
+            -d "$JSON_PAYLOAD" "${{ secrets.WEBHOOK_URL }}"
 
       - name: Final Cleanup
         if: always()
