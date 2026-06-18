@@ -83,7 +83,31 @@ jobs:
 
           NEW_COUNT=0
           SKIP_COUNT=0
+          FAIL_COUNT=0
           SYNCED_TAGS=""
+          SYNC_RESULT=""
+
+          # 中文化错误信息
+          translate_error() {
+              local err="$1"
+              if echo "$err" | grep -qi "manifest.*not found\|manifest unknown"; then
+                  echo "镜像不存在"
+              elif echo "$err" | grep -qi "unauthorized\|authentication required"; then
+                  echo "认证失败"
+              elif echo "$err" | grep -qi "toomanyrequests\|rate limit\|too many requests"; then
+                  echo "触发速率限制"
+              elif echo "$err" | grep -qi "dial tcp.*no such host\|Name or service not known\|lookup"; then
+                  echo "无法解析域名"
+              elif echo "$err" | grep -qi "i/o timeout\|connection timed out\|TLS handshake timeout"; then
+                  echo "网络超时"
+              elif echo "$err" | grep -qi "connection refused"; then
+                  echo "连接被拒绝"
+              elif echo "$err" | grep -qi "denied"; then
+                  echo "无权限访问"
+              else
+                  echo "拉取失败"
+              fi
+          }
 
           for TAG in $TAGS; do
             SOURCE_IMAGE="${SOURCE_REPO}:${TAG}"
@@ -100,13 +124,23 @@ jobs:
 
             echo "🚀 Syncing $SOURCE_IMAGE ..."
 
-            if docker pull "$SOURCE_IMAGE"; then
+            PULL_OUTPUT=$(docker pull "$SOURCE_IMAGE" 2>&1); PULL_EXIT=$?
+            echo "$PULL_OUTPUT"
+            if [ $PULL_EXIT -eq 0 ]; then
               docker tag "$SOURCE_IMAGE" "$TARGET_IMAGE"
               docker push "$TARGET_IMAGE"
               NEW_COUNT=$((NEW_COUNT + 1))
               SYNCED_TAGS="${SYNCED_TAGS}${TAG} "
+              SYNC_RESULT="${SYNC_RESULT}- ✅ \`${TAG}\`
+"
               echo "🎉 ${TAG} synced successfully!"
             else
+              FAIL_COUNT=$((FAIL_COUNT + 1))
+              PULL_ERR=$(echo "$PULL_OUTPUT" | grep -iE "Error response|error:|manifest|unauthorized|denied|timeout|refused|not found|EOF|TLS" | tail -1)
+              [ -z "$PULL_ERR" ] && PULL_ERR="$PULL_OUTPUT"
+              REASON=$(translate_error "$PULL_ERR")
+              SYNC_RESULT="${SYNC_RESULT}- ❌ \`${TAG}\` — **${REASON}**
+"
               echo "❌ Failed to pull $SOURCE_IMAGE, skipping."
               continue
             fi
@@ -120,37 +154,49 @@ jobs:
 
           echo "NEW_COUNT=$NEW_COUNT" >> $GITHUB_ENV
           echo "SKIP_COUNT=$SKIP_COUNT" >> $GITHUB_ENV
+          echo "FAIL_COUNT=$FAIL_COUNT" >> $GITHUB_ENV
           echo "SYNCED_TAGS=$SYNCED_TAGS" >> $GITHUB_ENV
+          echo "SYNC_RESULT<<EOF" >> $GITHUB_ENV
+          echo "$SYNC_RESULT" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
 
       - name: 钉钉通知
         if: always()
         env:
           NEW_COUNT: ${{ env.NEW_COUNT }}
           SKIP_COUNT: ${{ env.SKIP_COUNT }}
+          FAIL_COUNT: ${{ env.FAIL_COUNT }}
           SYNCED_TAGS: ${{ env.SYNCED_TAGS }}
+          SYNC_RESULT: ${{ env.SYNC_RESULT }}
         run: |
           [ -z "${{ secrets.WEBHOOK_URL }}" ] && exit 0
 
           N_COUNT=${NEW_COUNT:-0}
           K_COUNT=${SKIP_COUNT:-0}
+          F_COUNT=${FAIL_COUNT:-0}
           TARGET_NAME="${{ matrix.target_name }}"
 
-          if [ "$N_COUNT" -gt 0 ]; then
+          if [ "$F_COUNT" -gt 0 ]; then
+            TITLE="❌镜像 ${TARGET_NAME} 同步异常"
+            SUMMARY="成功 **${N_COUNT}** · 失败 **${F_COUNT}** · 跳过 **${K_COUNT}**"
+            DETAIL="${SYNC_RESULT:-}"
+          elif [ "$N_COUNT" -gt 0 ]; then
             TITLE="✅镜像 ${TARGET_NAME} 同步完成"
-            TAG_LIST="${SYNCED_TAGS:-}"
-            SUMMARY="新增: ${N_COUNT} | 跳过: ${K_COUNT}"
-            DETAIL="**新标签:** ${TAG_LIST}"
+            SUMMARY="新增 **${N_COUNT}** · 跳过 **${K_COUNT}**"
+            DETAIL="${SYNC_RESULT:-}"
           else
             TITLE="☕镜像 ${TARGET_NAME} 无新标签"
-            SUMMARY="跳过: ${K_COUNT}"
+            SUMMARY="跳过 **${K_COUNT}**"
             DETAIL="无新标签需要同步"
           fi
 
           MARKDOWN="## ${TITLE}
           > ${SUMMARY}
 
+          ---
           ${DETAIL}
 
+          ---
           🔗 [查看详情](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
 
           JSON_PAYLOAD=$(jq -n --arg title "$TITLE" --arg text "$MARKDOWN" \

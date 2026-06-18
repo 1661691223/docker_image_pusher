@@ -90,6 +90,28 @@ jobs:
           done < images.txt
 
           # ==================== 第二阶段：拉取、预检、推送 ====================
+          # 中文化错误信息
+          translate_error() {
+              local err="$1"
+              if echo "$err" | grep -qi "manifest.*not found\|manifest unknown"; then
+                  echo "镜像不存在"
+              elif echo "$err" | grep -qi "unauthorized\|authentication required"; then
+                  echo "认证失败"
+              elif echo "$err" | grep -qi "toomanyrequests\|rate limit\|too many requests"; then
+                  echo "触发速率限制"
+              elif echo "$err" | grep -qi "dial tcp.*no such host\|Name or service not known\|lookup"; then
+                  echo "无法解析域名"
+              elif echo "$err" | grep -qi "i/o timeout\|connection timed out\|TLS handshake timeout"; then
+                  echo "网络超时"
+              elif echo "$err" | grep -qi "connection refused"; then
+                  echo "连接被拒绝"
+              elif echo "$err" | grep -qi "denied"; then
+                  echo "无权限访问"
+              else
+                  echo "拉取失败"
+              fi
+          }
+
           SUCCESS_COUNT=0
           FAILURE_COUNT=0
           SKIP_COUNT=0
@@ -139,7 +161,9 @@ jobs:
               # ================================================
 
               echo "docker pull $line"
-              if docker pull $line; then
+              PULL_OUTPUT=$(docker pull $line 2>&1); PULL_EXIT=$?
+              echo "$PULL_OUTPUT"
+              if [ $PULL_EXIT -eq 0 ]; then
                   echo "docker tag $image $new_image"
                   docker tag $image $new_image
 
@@ -147,13 +171,16 @@ jobs:
                   docker push $new_image
 
                   SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-                  SYNC_RESULT="${SYNC_RESULT}- ✅ ${new_image##*/}
+                  SYNC_RESULT="${SYNC_RESULT}- ✅ \`${new_image##*/}\`
           "
                   SUCCESS_LINES="${SUCCESS_LINES}${line}
           "
               else
                   FAILURE_COUNT=$((FAILURE_COUNT + 1))
-                  SYNC_RESULT="${SYNC_RESULT}- ❌ ${line}: pull failed
+                  PULL_ERR=$(echo "$PULL_OUTPUT" | grep -iE "Error response|error:|manifest|unauthorized|denied|timeout|refused|not found|EOF|TLS" | tail -1)
+                  [ -z "$PULL_ERR" ] && PULL_ERR="$PULL_OUTPUT"
+                  REASON=$(translate_error "$PULL_ERR")
+                  SYNC_RESULT="${SYNC_RESULT}- ❌ \`${image_name_tag}\` — **${REASON}**
           "
                   echo "❌ Failed to pull $line, skipping."
               fi
@@ -192,21 +219,23 @@ jobs:
 
           if [ "$F_COUNT" -gt 0 ]; then
             TITLE="❌ 镜像同步异常"
-            SUMMARY="错误: ${F_COUNT} | 成功: ${S_COUNT} | 跳过: ${K_COUNT}"
+            SUMMARY="成功 **${S_COUNT}** · 失败 **${F_COUNT}** · 跳过 **${K_COUNT}**"
           elif [ "$S_COUNT" -gt 0 ]; then
             TITLE="✅ 镜像同步完成"
-            SUMMARY="成功: ${S_COUNT} | 跳过: ${K_COUNT}"
+            SUMMARY="成功 **${S_COUNT}** · 跳过 **${K_COUNT}**"
           else
             TITLE="☕ 无新镜像"
-            SUMMARY="全部跳过: ${K_COUNT}"
+            SUMMARY="全部跳过 **${K_COUNT}**"
           fi
 
           DETAIL="${SYNC_RESULT:-}"
           MARKDOWN="## ${TITLE}
           > ${SUMMARY}
 
+          ---
           ${DETAIL}
 
+          ---
           🔗 [查看详情](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
 
           JSON_PAYLOAD=$(jq -n --arg title "$TITLE" --arg text "$MARKDOWN" \
