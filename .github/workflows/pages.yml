@@ -49,6 +49,7 @@ jobs:
           name: successful-syncs
           path: /tmp/
           run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
         continue-on-error: true
 
       - name: Collect version data
