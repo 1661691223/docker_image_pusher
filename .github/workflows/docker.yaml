@@ -171,17 +171,14 @@ jobs:
                   docker push $new_image
 
                   SUCCESS_COUNT=$((SUCCESS_COUNT + 1))
-                  SYNC_RESULT="${SYNC_RESULT}- ✅ \`${new_image##*/}\`
-          "
-                  SUCCESS_LINES="${SUCCESS_LINES}${line}
-          "
+                  SYNC_RESULT="${SYNC_RESULT}- ✅ \`${new_image##*/}\`"$'\n'
+                  SUCCESS_LINES="${SUCCESS_LINES}${line}"$'\n'
               else
                   FAILURE_COUNT=$((FAILURE_COUNT + 1))
                   PULL_ERR=$(grep -iE "Error response|error:|manifest|unauthorized|denied|timeout|refused|not found|EOF|TLS" /tmp/pull_log.txt | tail -1)
                   [ -z "$PULL_ERR" ] && PULL_ERR=$(tail -3 /tmp/pull_log.txt)
                   REASON=$(translate_error "$PULL_ERR")
-                  SYNC_RESULT="${SYNC_RESULT}- ❌ \`${image_name_tag}\` — **${REASON}**
-          "
+                  SYNC_RESULT="${SYNC_RESULT}- ❌ \`${image_name_tag}\` — **${REASON}**"$'\n'
                   echo "❌ Failed to pull $line, skipping."
               fi
 
@@ -229,14 +226,8 @@ jobs:
           fi
 
           DETAIL="${SYNC_RESULT:-}"
-          MARKDOWN="## ${TITLE}
-          > ${SUMMARY}
-
-          ---
-          ${DETAIL}
-
-          ---
-          🔗 [查看详情](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          printf -v MARKDOWN '## %s\n> %s\n\n---\n%s\n\n---\n🔗 [查看详情](%s)' "$TITLE" "$SUMMARY" "$DETAIL" "$URL"
 
           JSON_PAYLOAD=$(jq -n --arg title "$TITLE" --arg text "$MARKDOWN" \
             '{"msgtype":"markdown","markdown":{"title":$title,"text":$text}}')

@@ -131,16 +131,14 @@ jobs:
               docker push "$TARGET_IMAGE"
               NEW_COUNT=$((NEW_COUNT + 1))
               SYNCED_TAGS="${SYNCED_TAGS}${TAG} "
-              SYNC_RESULT="${SYNC_RESULT}- ✅ \`${TAG}\`
-"
+              SYNC_RESULT="${SYNC_RESULT}- ✅ \`${TAG}\`"$'\n'
               echo "🎉 ${TAG} synced successfully!"
             else
               FAIL_COUNT=$((FAIL_COUNT + 1))
               PULL_ERR=$(grep -iE "Error response|error:|manifest|unauthorized|denied|timeout|refused|not found|EOF|TLS" /tmp/pull_log.txt | tail -1)
               [ -z "$PULL_ERR" ] && PULL_ERR=$(tail -3 /tmp/pull_log.txt)
               REASON=$(translate_error "$PULL_ERR")
-              SYNC_RESULT="${SYNC_RESULT}- ❌ \`${TAG}\` — **${REASON}**
-"
+              SYNC_RESULT="${SYNC_RESULT}- ❌ \`${TAG}\` — **${REASON}**"$'\n'
               echo "❌ Failed to pull $SOURCE_IMAGE, skipping."
               continue
             fi
@@ -190,14 +188,8 @@ jobs:
             DETAIL="无新标签需要同步"
           fi
 
-          MARKDOWN="## ${TITLE}
-          > ${SUMMARY}
-
-          ---
-          ${DETAIL}
-
-          ---
-          🔗 [查看详情](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          URL="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          printf -v MARKDOWN '## %s\n> %s\n\n---\n%s\n\n---\n🔗 [查看详情](%s)' "$TITLE" "$SUMMARY" "$DETAIL" "$URL"
 
           JSON_PAYLOAD=$(jq -n --arg title "$TITLE" --arg text "$MARKDOWN" \
             '{"msgtype":"markdown","markdown":{"title":$title,"text":$text}}')
