@@ -4,6 +4,9 @@
 - 支持DockerHub, gcr.io, k8s.io, ghcr.io等任意仓库<br>
 - 支持最大40GB的大型镜像<br>
 - 使用阿里云的官方线路，速度快<br>
+- SGLang/vLLM 最新标签定时同步<br>
+- 密码保护的镜像展示页面 (GitHub Pages)<br>
+- 钉钉机器人通知<br>
 
 视频教程：https://www.bilibili.com/video/BV1Zn4y19743/
 
@@ -35,8 +38,12 @@ Fork本项目<br>
 进入Settings->Secret and variables->Actions->New Repository secret
 ![](doc/配置环境变量.png)
 将上一步的**四个值**<br>
-ALIYUN_NAME_SPACE,ALIYUN_REGISTRY_USER，ALIYUN_REGISTRY_PASSWORD，ALIYUN_REGISTRY<br>
-配置成环境变量
+ALIYUN_NAME_SPACE,ALIYUN_REGISTRY_USER,ALIYUN_REGISTRY_PASSWORD,ALIYUN_REGISTRY<br>
+配置成环境变量<br>
+<br>
+#### 可选: 配置 Pages 页面和钉钉通知
+如需启用镜像展示页面和多用户登录，还需配置 `PAGE_MASTER_PASSWORD` 和 `PAGE_USERS`。<br>
+如需钉钉通知，配置 `WEBHOOK_URL`。详见 [PAGES_README.md](./PAGES_README.md)。
 
 ### 添加镜像
 打开images.txt文件，添加你想要的镜像 
