@@ -171,9 +171,8 @@ jobs:
           done < images.txt
 
           # 保存成功同步的镜像行，供 pages workflow 收集版本用
-          if [ -n "$SUCCESS_LINES" ]; then
-            echo "$SUCCESS_LINES" > /tmp/successful_syncs.txt
-          fi
+          # 始终创建文件(即使为空)，确保 artifact 能被上传
+          echo "$SUCCESS_LINES" > /tmp/successful_syncs.txt
 
           echo "SUCCESS_COUNT=$SUCCESS_COUNT" >> $GITHUB_ENV
           echo "FAILURE_COUNT=$FAILURE_COUNT" >> $GITHUB_ENV

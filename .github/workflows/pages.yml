@@ -59,10 +59,15 @@ jobs:
         run: |
           chmod +x scripts/collect_versions.sh
 
-          # 优先使用 docker/sglang 同步成功列表，失败或跳过的镜像不收集
-          if [ -f /tmp/successful_syncs.txt ] && [ -s /tmp/successful_syncs.txt ]; then
-            echo "Using successful sync list from artifact"
-            bash scripts/collect_versions.sh --file /tmp/successful_syncs.txt
+          # 优先使用 docker 同步成功列表
+          # 如果文件存在(即使为空)，说明有 artifact，不要回退到 images.txt
+          if [ -f /tmp/successful_syncs.txt ]; then
+            if [ -s /tmp/successful_syncs.txt ]; then
+              echo "Using successful sync list from artifact"
+              bash scripts/collect_versions.sh --file /tmp/successful_syncs.txt
+            else
+              echo "No images were successfully synced, skipping collection from images.txt"
+            fi
           else
             bash scripts/collect_versions.sh
           fi
