@@ -136,12 +136,12 @@ jobs:
           TARGET_NAME="${{ matrix.target_name }}"
 
           if [ "$N_COUNT" -gt 0 ]; then
-            TITLE="✅ ${TARGET_NAME} 同步完成"
+            TITLE="✅镜像 ${TARGET_NAME} 同步完成"
             TAG_LIST="${SYNCED_TAGS:-}"
             SUMMARY="新增: ${N_COUNT} | 跳过: ${K_COUNT}"
             DETAIL="**新标签:** ${TAG_LIST}"
           else
-            TITLE="☕ ${TARGET_NAME} 无新标签"
+            TITLE="☕镜像 ${TARGET_NAME} 无新标签"
             SUMMARY="跳过: ${K_COUNT}"
             DETAIL="无新标签需要同步"
           fi
