@@ -14,7 +14,7 @@ on:
     paths:
       - 'scripts/**'
       - 'pages/**'
-      - 'data/**'
+      - 'data/import_data.json'
 
 permissions:
   contents: write
