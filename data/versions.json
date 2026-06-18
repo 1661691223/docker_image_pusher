@@ -3590,7 +3590,61 @@
       "platform": "",
       "build_time": "2026-06-18T10:06:20Z",
       "run_id": "27752101290"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.16.1",
+      "platform": "",
+      "build_time": "2026-06-18T10:24:02Z",
+      "run_id": "27753028925"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.16.2",
+      "platform": "",
+      "build_time": "2026-06-18T10:24:02Z",
+      "run_id": "27753028925"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.16.3",
+      "platform": "",
+      "build_time": "2026-06-18T10:24:02Z",
+      "run_id": "27753028925"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.14.3",
+      "platform": "",
+      "build_time": "2026-06-18T10:24:02Z",
+      "run_id": "27753028925"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.13.3",
+      "platform": "",
+      "build_time": "2026-06-18T10:24:02Z",
+      "run_id": "27753028925"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.11.0",
+      "platform": "",
+      "build_time": "2026-06-18T10:24:02Z",
+      "run_id": "27753028925"
     }
   ],
-  "last_updated": "2026-06-18T10:06:20Z"
+  "last_updated": "2026-06-18T10:24:02Z"
 }
