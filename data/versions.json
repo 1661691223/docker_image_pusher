@@ -3581,7 +3581,16 @@
       "platform": "",
       "build_time": "2026-06-18T09:14:06Z",
       "run_id": "27749273721"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.12.0",
+      "platform": "",
+      "build_time": "2026-06-18T10:06:20Z",
+      "run_id": "27752101290"
     }
   ],
-  "last_updated": "2026-06-18T09:14:06Z"
+  "last_updated": "2026-06-18T10:06:20Z"
 }
