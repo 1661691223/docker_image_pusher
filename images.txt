@@ -54,5 +54,7 @@
 #vllm/vllm-openai:v0.20.2
 #vllm/vllm-openai:v0.20.1
 #vllm/vllm-openai:v0.20.0
-vllm/vllm-openai:v0.16.0
+#vllm/vllm-openai:v0.16.0
 vllm/vllm-openai:v0.16.1
+vllm/vllm-openai:v0.16.2
+vllm/vllm-openai:v0.16.3
