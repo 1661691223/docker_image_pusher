@@ -59,17 +59,27 @@ jobs:
               data = json.load(f)
 
           tag_files = glob.glob('data/*_tags.json')
-          for tf in tag_files:
-              with open(tf, 'r') as f:
-                  tags = json.load(f)
-              data['images'].extend(tags)
-              print(f'Merged {len(tags)} tags from {tf}')
 
           # 去重: name + namespace + tag + platform 唯一
+          # 已有记录保留原始 build_time/run_id，不被 tag 文件的新时间戳覆盖
           seen = {}
           for img in data['images']:
               key = (img.get('name'), img.get('namespace', ''), img.get('tag'), img.get('platform', ''))
               seen[key] = img
+
+          new_count = 0
+          for tf in tag_files:
+              file_new = 0
+              with open(tf, 'r') as f:
+                  tags = json.load(f)
+              for tag in tags:
+                  key = (tag.get('name'), tag.get('namespace', ''), tag.get('tag'), tag.get('platform', ''))
+                  if key not in seen:
+                      seen[key] = tag
+                      new_count += 1
+                      file_new += 1
+              print(f'Added {file_new} new tags from {tf}, skipped {len(tags) - file_new} existing')
+
           data['images'] = list(seen.values())
 
           with open('data/versions.json', 'w') as f:
