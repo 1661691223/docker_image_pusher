@@ -168,21 +168,25 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SOURCE_REPO: ${{ matrix.source_repo }}
           TARGET_NAME: ${{ matrix.target_name }}
+          SYNCED_TAGS: ${{ env.SYNCED_TAGS }}
         run: |
-          TAGS=$(curl -s "https://hub.docker.com/v2/repositories/${SOURCE_REPO}/tags?page_size=100" | \
-            jq -r '.results[] | .name' | \
-            ${{ matrix.filter_cmd }} | \
-            head -n 30)
-
           mkdir -p data
           JSON_FILE="data/${TARGET_NAME}_tags.json"
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
+          # 只保存实际同步成功的标签，失败的标签不写入 *_tags.json
+          if [ -z "${SYNCED_TAGS:-}" ]; then
+            echo "No tags were synced for ${TARGET_NAME}, skipping save."
+            exit 0
+          fi
+
           python3 -c "
           import json, os
 
-          tags = '''$TAGS'''.strip().split('\n')
-          tags = [t.strip() for t in tags if t.strip()]
+          synced = os.environ.get('SYNCED_TAGS', '').strip().split()
+          if not synced:
+              print('No synced tags to save.')
+              exit(0)
 
           registry = os.environ.get('ACR_REGISTRY', '')
           source_repo = os.environ.get('SOURCE_REPO', '')
@@ -193,7 +197,7 @@ jobs:
           json_file = '$JSON_FILE'
 
           records = []
-          for tag in tags:
+          for tag in synced:
               records.append({
                   'registry': registry,
                   'namespace': namespace,
