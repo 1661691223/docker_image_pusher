@@ -124,7 +124,7 @@ jobs:
 
             echo "🚀 Syncing $SOURCE_IMAGE ..."
 
-            docker pull "$SOURCE_IMAGE" > /tmp/pull_log.txt 2>&1; PULL_EXIT=$?
+            docker pull "$SOURCE_IMAGE" > /tmp/pull_log.txt 2>&1 && PULL_EXIT=0 || PULL_EXIT=$?
             cat /tmp/pull_log.txt
             if [ $PULL_EXIT -eq 0 ]; then
               docker tag "$SOURCE_IMAGE" "$TARGET_IMAGE"

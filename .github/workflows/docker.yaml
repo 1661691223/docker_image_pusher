@@ -161,7 +161,7 @@ jobs:
               # ================================================
 
               echo "docker pull $line"
-              docker pull $line > /tmp/pull_log.txt 2>&1; PULL_EXIT=$?
+              docker pull $line > /tmp/pull_log.txt 2>&1 && PULL_EXIT=0 || PULL_EXIT=$?
               cat /tmp/pull_log.txt
               if [ $PULL_EXIT -eq 0 ]; then
                   echo "docker tag $image $new_image"
