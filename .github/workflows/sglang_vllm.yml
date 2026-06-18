@@ -124,8 +124,8 @@ jobs:
 
             echo "🚀 Syncing $SOURCE_IMAGE ..."
 
-            PULL_OUTPUT=$(docker pull "$SOURCE_IMAGE" 2>&1); PULL_EXIT=$?
-            echo "$PULL_OUTPUT"
+            docker pull "$SOURCE_IMAGE" > /tmp/pull_log.txt 2>&1; PULL_EXIT=$?
+            cat /tmp/pull_log.txt
             if [ $PULL_EXIT -eq 0 ]; then
               docker tag "$SOURCE_IMAGE" "$TARGET_IMAGE"
               docker push "$TARGET_IMAGE"
@@ -136,8 +136,8 @@ jobs:
               echo "🎉 ${TAG} synced successfully!"
             else
               FAIL_COUNT=$((FAIL_COUNT + 1))
-              PULL_ERR=$(echo "$PULL_OUTPUT" | grep -iE "Error response|error:|manifest|unauthorized|denied|timeout|refused|not found|EOF|TLS" | tail -1)
-              [ -z "$PULL_ERR" ] && PULL_ERR="$PULL_OUTPUT"
+              PULL_ERR=$(grep -iE "Error response|error:|manifest|unauthorized|denied|timeout|refused|not found|EOF|TLS" /tmp/pull_log.txt | tail -1)
+              [ -z "$PULL_ERR" ] && PULL_ERR=$(tail -3 /tmp/pull_log.txt)
               REASON=$(translate_error "$PULL_ERR")
               SYNC_RESULT="${SYNC_RESULT}- ❌ \`${TAG}\` — **${REASON}**
 "

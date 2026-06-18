@@ -161,8 +161,8 @@ jobs:
               # ================================================
 
               echo "docker pull $line"
-              PULL_OUTPUT=$(docker pull $line 2>&1); PULL_EXIT=$?
-              echo "$PULL_OUTPUT"
+              docker pull $line > /tmp/pull_log.txt 2>&1; PULL_EXIT=$?
+              cat /tmp/pull_log.txt
               if [ $PULL_EXIT -eq 0 ]; then
                   echo "docker tag $image $new_image"
                   docker tag $image $new_image
@@ -177,8 +177,8 @@ jobs:
           "
               else
                   FAILURE_COUNT=$((FAILURE_COUNT + 1))
-                  PULL_ERR=$(echo "$PULL_OUTPUT" | grep -iE "Error response|error:|manifest|unauthorized|denied|timeout|refused|not found|EOF|TLS" | tail -1)
-                  [ -z "$PULL_ERR" ] && PULL_ERR="$PULL_OUTPUT"
+                  PULL_ERR=$(grep -iE "Error response|error:|manifest|unauthorized|denied|timeout|refused|not found|EOF|TLS" /tmp/pull_log.txt | tail -1)
+                  [ -z "$PULL_ERR" ] && PULL_ERR=$(tail -3 /tmp/pull_log.txt)
                   REASON=$(translate_error "$PULL_ERR")
                   SYNC_RESULT="${SYNC_RESULT}- ❌ \`${image_name_tag}\` — **${REASON}**
           "
