@@ -4166,6 +4166,15 @@
       "platform": "",
       "build_time": "2026-06-29T12:46:47Z",
       "run_id": "28370626797"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.24.0",
+      "platform": "",
+      "build_time": "2026-06-30T00:25:25Z",
+      "run_id": "28411247214"
     }
   ],
   "last_updated": "2026-06-18T10:24:02Z"
