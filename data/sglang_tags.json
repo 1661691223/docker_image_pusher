@@ -3850,5 +3850,86 @@
     "platform": "",
     "build_time": "2026-07-01T11:26:41Z",
     "run_id": "28511903076"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "dev-cu13-laguna-xs-2-1",
+    "platform": "",
+    "build_time": "2026-07-02T12:11:39Z",
+    "run_id": "28582405700"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "dev-laguna-xs-2-1",
+    "platform": "",
+    "build_time": "2026-07-02T12:11:39Z",
+    "run_id": "28582405700"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "dev-cu12-laguna-xs-2-1",
+    "platform": "",
+    "build_time": "2026-07-02T12:11:39Z",
+    "run_id": "28582405700"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "dev-cu13-dev-qwen36-27b-nvfp4",
+    "platform": "",
+    "build_time": "2026-07-02T12:11:39Z",
+    "run_id": "28582405700"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "dev-dev-qwen36-27b-nvfp4",
+    "platform": "",
+    "build_time": "2026-07-02T12:11:39Z",
+    "run_id": "28582405700"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "dev-cu12-dev-qwen36-27b-nvfp4",
+    "platform": "",
+    "build_time": "2026-07-02T12:11:39Z",
+    "run_id": "28582405700"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "nightly-dev-cu13-20260702-a3f66808",
+    "platform": "",
+    "build_time": "2026-07-02T12:11:39Z",
+    "run_id": "28582405700"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "nightly-dev-20260702-a3f66808",
+    "platform": "",
+    "build_time": "2026-07-02T12:11:39Z",
+    "run_id": "28582405700"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "nightly-dev-cu12-20260702-a3f66808",
+    "platform": "",
+    "build_time": "2026-07-02T12:11:39Z",
+    "run_id": "28582405700"
   }
 ]
