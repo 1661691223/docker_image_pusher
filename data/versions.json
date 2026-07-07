@@ -4418,6 +4418,60 @@
       "platform": "",
       "build_time": "2026-07-06T12:24:57Z",
       "run_id": "28788907655"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-cu13-dspark",
+      "platform": "",
+      "build_time": "2026-07-07T11:44:22Z",
+      "run_id": "28859457816"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-dspark",
+      "platform": "",
+      "build_time": "2026-07-07T11:44:22Z",
+      "run_id": "28859457816"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-cu12-dspark",
+      "platform": "",
+      "build_time": "2026-07-07T11:44:22Z",
+      "run_id": "28859457816"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "nightly-dev-cu13-20260707-b4155233",
+      "platform": "",
+      "build_time": "2026-07-07T11:44:22Z",
+      "run_id": "28859457816"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "nightly-dev-20260707-b4155233",
+      "platform": "",
+      "build_time": "2026-07-07T11:44:22Z",
+      "run_id": "28859457816"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "nightly-dev-cu12-20260707-b4155233",
+      "platform": "",
+      "build_time": "2026-07-07T11:44:22Z",
+      "run_id": "28859457816"
     }
   ],
   "last_updated": "2026-06-18T10:24:02Z"
