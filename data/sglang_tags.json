@@ -4669,5 +4669,32 @@
     "platform": "",
     "build_time": "2026-07-19T09:48:06Z",
     "run_id": "29681048173"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "nightly-dev-cu13-20260720-b3570a45",
+    "platform": "",
+    "build_time": "2026-07-20T10:59:52Z",
+    "run_id": "29734564221"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "nightly-dev-20260720-b3570a45",
+    "platform": "",
+    "build_time": "2026-07-20T10:59:52Z",
+    "run_id": "29734564221"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "nightly-dev-cu12-20260720-b3570a45",
+    "platform": "",
+    "build_time": "2026-07-20T10:59:52Z",
+    "run_id": "29734564221"
   }
 ]
