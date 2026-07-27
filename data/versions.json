@@ -5381,6 +5381,42 @@
       "platform": "",
       "build_time": "2026-07-27T11:31:16Z",
       "run_id": "30259494395"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "kimi-k3-cu12",
+      "platform": "",
+      "build_time": "2026-07-27T17:41:50Z",
+      "run_id": "30287498576"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "kimi-k3",
+      "platform": "",
+      "build_time": "2026-07-27T17:41:50Z",
+      "run_id": "30287498576"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "kimi-k3-cu12-74968e5653-amd64",
+      "platform": "",
+      "build_time": "2026-07-27T17:41:50Z",
+      "run_id": "30287498576"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "kimi-k3-74968e5653-amd64",
+      "platform": "",
+      "build_time": "2026-07-27T17:41:50Z",
+      "run_id": "30287498576"
     }
   ],
   "last_updated": "2026-06-18T10:24:02Z"
