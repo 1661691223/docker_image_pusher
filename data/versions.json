@@ -5444,6 +5444,15 @@
       "platform": "",
       "build_time": "2026-07-29T10:24:45Z",
       "run_id": "30440721517"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "kimi-k3-c6ad1f26-20260729-amd64",
+      "platform": "",
+      "build_time": "2026-07-29T16:38:16Z",
+      "run_id": "30470673827"
     }
   ],
   "last_updated": "2026-06-18T10:24:02Z"
