@@ -5507,6 +5507,33 @@
       "platform": "",
       "build_time": "2026-07-31T10:29:31Z",
       "run_id": "30621319025"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-cu13-inkling-small-dgx-spark",
+      "platform": "",
+      "build_time": "2026-08-01T00:45:54Z",
+      "run_id": "30674619559"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-inkling-small-dgx-spark",
+      "platform": "",
+      "build_time": "2026-08-01T00:45:54Z",
+      "run_id": "30674619559"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-cu12-inkling-small-dgx-spark",
+      "platform": "",
+      "build_time": "2026-08-01T00:45:54Z",
+      "run_id": "30674619559"
     }
   ],
   "last_updated": "2026-06-18T10:24:02Z"
