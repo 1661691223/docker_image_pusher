@@ -5615,6 +5615,33 @@
       "platform": "",
       "build_time": "2026-08-03T11:28:14Z",
       "run_id": "30807043628"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-cu13-Ling-3.0-flash",
+      "platform": "",
+      "build_time": "2026-08-05T00:54:02Z",
+      "run_id": "30962403350"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-Ling-3.0-flash",
+      "platform": "",
+      "build_time": "2026-08-05T00:54:02Z",
+      "run_id": "30962403350"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-cu12-Ling-3.0-flash",
+      "platform": "",
+      "build_time": "2026-08-05T00:54:02Z",
+      "run_id": "30962403350"
     }
   ],
   "last_updated": "2026-06-18T10:24:02Z"
