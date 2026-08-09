@@ -5840,6 +5840,33 @@
       "platform": "",
       "build_time": "2026-08-08T11:09:25Z",
       "run_id": "31247144624"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-cu13-nemotron3-5-lighting",
+      "platform": "",
+      "build_time": "2026-08-09T00:16:06Z",
+      "run_id": "31284294270"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-nemotron3-5-lighting",
+      "platform": "",
+      "build_time": "2026-08-09T00:16:06Z",
+      "run_id": "31284294270"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-cu12-nemotron3-5-lighting",
+      "platform": "",
+      "build_time": "2026-08-09T00:16:06Z",
+      "run_id": "31284294270"
     }
   ],
   "last_updated": "2026-06-18T10:24:02Z"
