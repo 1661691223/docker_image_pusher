@@ -5921,6 +5921,51 @@
       "platform": "",
       "build_time": "2026-08-10T09:30:04Z",
       "run_id": "31371368492"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-muse-glimmer",
+      "platform": "",
+      "build_time": "2026-08-10T17:01:59Z",
+      "run_id": "31406927931"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-Ling-3.0-tiny",
+      "platform": "",
+      "build_time": "2026-08-10T17:01:59Z",
+      "run_id": "31406927931"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-patch-34262",
+      "platform": "",
+      "build_time": "2026-08-10T17:01:59Z",
+      "run_id": "31406927931"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-muse-glimmer-amd64",
+      "platform": "",
+      "build_time": "2026-08-10T17:01:59Z",
+      "run_id": "31406927931"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-muse-glimmer-arm64",
+      "platform": "",
+      "build_time": "2026-08-10T17:01:59Z",
+      "run_id": "31406927931"
     }
   ],
   "last_updated": "2026-06-18T10:24:02Z"
