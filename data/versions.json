@@ -6002,6 +6002,42 @@
       "platform": "",
       "build_time": "2026-08-11T08:57:09Z",
       "run_id": "31472175883"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-cu13-nemotron3-5-lightning",
+      "platform": "",
+      "build_time": "2026-08-11T16:48:42Z",
+      "run_id": "31510407452"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-nemotron3-5-lightning",
+      "platform": "",
+      "build_time": "2026-08-11T16:48:42Z",
+      "run_id": "31510407452"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "dev-cu12-Ling-3.0-tiny",
+      "platform": "",
+      "build_time": "2026-08-11T16:48:42Z",
+      "run_id": "31510407452"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.27.1",
+      "platform": "",
+      "build_time": "2026-08-11T16:19:35Z",
+      "run_id": "31510407452"
     }
   ],
   "last_updated": "2026-06-18T10:24:02Z"
