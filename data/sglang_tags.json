@@ -5641,5 +5641,23 @@
     "platform": "",
     "build_time": "2026-08-12T09:25:45Z",
     "run_id": "31578083957"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "qwen38-cu129",
+    "platform": "",
+    "build_time": "2026-08-12T16:32:25Z",
+    "run_id": "31615568366"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "qwen38",
+    "platform": "",
+    "build_time": "2026-08-12T16:32:25Z",
+    "run_id": "31615568366"
   }
 ]
