@@ -6226,5 +6226,41 @@
     "platform": "",
     "build_time": "2026-08-26T08:32:39Z",
     "run_id": "32944787750"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "glm-5.3-flash",
+    "platform": "",
+    "build_time": "2026-08-26T17:00:10Z",
+    "run_id": "32988032244"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "glm-5.3-flash-amd64",
+    "platform": "",
+    "build_time": "2026-08-26T17:00:10Z",
+    "run_id": "32988032244"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "probe-write-kimi-0826",
+    "platform": "",
+    "build_time": "2026-08-26T17:00:10Z",
+    "run_id": "32988032244"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "qwen38flashnext",
+    "platform": "",
+    "build_time": "2026-08-26T17:00:10Z",
+    "run_id": "32988032244"
   }
 ]
