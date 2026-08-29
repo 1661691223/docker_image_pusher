@@ -6812,6 +6812,24 @@
       "platform": "",
       "build_time": "2026-08-29T05:19:41Z",
       "run_id": "33232971776"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "hy4-preview-cd32c1cb",
+      "platform": "",
+      "build_time": "2026-08-29T13:55:51Z",
+      "run_id": "33254160028"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "hy4-preview-cd32c1cb-amd64",
+      "platform": "",
+      "build_time": "2026-08-29T13:55:51Z",
+      "run_id": "33254160028"
     }
   ],
   "last_updated": "2026-06-18T10:24:02Z"
