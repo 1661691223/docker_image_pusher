@@ -6568,5 +6568,14 @@
     "platform": "",
     "build_time": "2026-09-01T13:01:09Z",
     "run_id": "33507964510"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "tmp-glm53flash-pr36507-20260901-amd64",
+    "platform": "",
+    "build_time": "2026-09-01T18:28:15Z",
+    "run_id": "33542833498"
   }
 ]
