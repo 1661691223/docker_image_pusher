@@ -6478,5 +6478,86 @@
     "platform": "",
     "build_time": "2026-08-31T16:03:32Z",
     "run_id": "33405782699"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "nightly-dev-cu13-20260901-07c8f729",
+    "platform": "",
+    "build_time": "2026-09-01T04:20:53Z",
+    "run_id": "33459916312"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "nightly-dev-20260901-07c8f729",
+    "platform": "",
+    "build_time": "2026-09-01T04:20:53Z",
+    "run_id": "33459916312"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "nightly-dev-cu12-20260901-07c8f729",
+    "platform": "",
+    "build_time": "2026-09-01T04:20:53Z",
+    "run_id": "33459916312"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "dev-cu13-qwen3-vl-perf",
+    "platform": "",
+    "build_time": "2026-09-01T04:20:53Z",
+    "run_id": "33459916312"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "dev-qwen3-vl-perf",
+    "platform": "",
+    "build_time": "2026-09-01T04:20:53Z",
+    "run_id": "33459916312"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "dev-cu12-qwen3-vl-perf",
+    "platform": "",
+    "build_time": "2026-09-01T04:20:53Z",
+    "run_id": "33459916312"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "dev-cu13-dsv4-flash-vision",
+    "platform": "",
+    "build_time": "2026-09-01T04:20:53Z",
+    "run_id": "33459916312"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "dev-dsv4-flash-vision",
+    "platform": "",
+    "build_time": "2026-09-01T04:20:53Z",
+    "run_id": "33459916312"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "dev-cu12-dsv4-flash-vision",
+    "platform": "",
+    "build_time": "2026-09-01T04:20:53Z",
+    "run_id": "33459916312"
   }
 ]
