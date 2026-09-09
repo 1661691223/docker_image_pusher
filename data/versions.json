@@ -7370,6 +7370,15 @@
       "platform": "",
       "build_time": "2026-09-08T13:08:00Z",
       "run_id": "34224047984"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.29.0",
+      "platform": "",
+      "build_time": "2026-09-09T01:26:37Z",
+      "run_id": "34297937466"
     }
   ],
   "last_updated": "2026-06-18T10:24:02Z"
