@@ -6982,5 +6982,23 @@
     "platform": "",
     "build_time": "2026-09-10T18:41:13Z",
     "run_id": "34513213661"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "dev-cu13-dsv41",
+    "platform": "",
+    "build_time": "2026-09-11T01:31:48Z",
+    "run_id": "34548403308"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "dev-cu12-dsv41",
+    "platform": "",
+    "build_time": "2026-09-11T01:31:48Z",
+    "run_id": "34548403308"
   }
 ]
