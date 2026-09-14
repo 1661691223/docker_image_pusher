@@ -7523,7 +7523,16 @@
       "platform": "",
       "build_time": "2026-09-14T08:04:12Z",
       "run_id": "34820804671"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "",
+      "name": "postgres",
+      "tag": "16-alpine",
+      "platform": "",
+      "build_time": "2026-09-14T09:59:54Z",
+      "run_id": "34830833565"
     }
   ],
-  "last_updated": "2026-09-14T08:04:12Z"
+  "last_updated": "2026-09-14T09:59:54Z"
 }
