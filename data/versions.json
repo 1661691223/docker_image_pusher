@@ -7505,7 +7505,16 @@
       "platform": "",
       "build_time": "2026-09-13T15:32:24Z",
       "run_id": "34757675633"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "apache",
+      "name": "polaris",
+      "tag": "1.7.0",
+      "platform": "",
+      "build_time": "2026-09-14T07:15:41Z",
+      "run_id": "34816960991"
     }
   ],
-  "last_updated": "2026-06-18T10:24:02Z"
+  "last_updated": "2026-09-14T07:15:41Z"
 }
