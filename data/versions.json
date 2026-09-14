@@ -7514,7 +7514,16 @@
       "platform": "",
       "build_time": "2026-09-14T07:15:41Z",
       "run_id": "34816960991"
+    },
+    {
+      "registry": "docker.io",
+      "namespace": "",
+      "name": "mysql",
+      "tag": "8.4.11",
+      "platform": "",
+      "build_time": "2026-09-14T08:04:12Z",
+      "run_id": "34820804671"
     }
   ],
-  "last_updated": "2026-09-14T07:15:41Z"
+  "last_updated": "2026-09-14T08:04:12Z"
 }
