@@ -63,4 +63,4 @@
 #vllm/vllm-openai:v0.13.3
 #vllm/vllm-openai:v0.12.0
 #vllm/vllm-openai:v0.11.0
-apache/polaris-service:latest
+apache/polaris:1.7.0
