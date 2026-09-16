@@ -7117,5 +7117,14 @@
     "platform": "",
     "build_time": "2026-09-16T01:41:27Z",
     "run_id": "35043274459"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "dev-cu13-Ling-3.0-flash-VL",
+    "platform": "",
+    "build_time": "2026-09-16T19:08:40Z",
+    "run_id": "35136534358"
   }
 ]
