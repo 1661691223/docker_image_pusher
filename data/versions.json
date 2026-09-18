@@ -7622,6 +7622,24 @@
       "platform": "",
       "build_time": "2026-09-17T12:59:42Z",
       "run_id": "35221605793"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "nightly-dev-cu13-20260918-20518d85",
+      "platform": "",
+      "build_time": "2026-09-18T01:38:16Z",
+      "run_id": "35294180714"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "nightly-dev-20260918-20518d85",
+      "platform": "",
+      "build_time": "2026-09-18T01:38:16Z",
+      "run_id": "35294180714"
     }
   ],
   "last_updated": "2026-09-14T09:59:54Z"
