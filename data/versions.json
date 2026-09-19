@@ -7703,6 +7703,15 @@
       "platform": "",
       "build_time": "2026-09-18T19:15:58Z",
       "run_id": "35379124461"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "rocm724-mi35x-20260918-minimax-m3",
+      "platform": "",
+      "build_time": "2026-09-19T01:29:53Z",
+      "run_id": "35411475335"
     }
   ],
   "last_updated": "2026-09-14T09:59:54Z"
