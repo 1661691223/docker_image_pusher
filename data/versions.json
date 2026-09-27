@@ -7928,6 +7928,15 @@
       "platform": "",
       "build_time": "2026-09-27T01:41:32Z",
       "run_id": "36285002589"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "nightly-cu134-20260927-f1e62e3",
+      "platform": "",
+      "build_time": "2026-09-27T18:05:57Z",
+      "run_id": "36320537387"
     }
   ],
   "last_updated": "2026-09-14T09:59:54Z"
