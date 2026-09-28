@@ -7477,5 +7477,14 @@
     "platform": "",
     "build_time": "2026-09-28T04:20:10Z",
     "run_id": "36366186274"
+  },
+  {
+    "registry": "registry.cn-hangzhou.aliyuncs.com",
+    "namespace": "lmsysorg",
+    "name": "sglang",
+    "tag": "nightly-cu134-20260928-6caf0ff",
+    "platform": "",
+    "build_time": "2026-09-28T18:08:55Z",
+    "run_id": "36442026702"
   }
 ]
