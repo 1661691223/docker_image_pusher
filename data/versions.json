@@ -8153,6 +8153,33 @@
       "platform": "",
       "build_time": "2026-10-03T02:17:21Z",
       "run_id": "37087606525"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "nightly-dev-cu13-20261004-295a53c9",
+      "platform": "",
+      "build_time": "2026-10-04T02:56:45Z",
+      "run_id": "37171180623"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "nightly-dev-20261004-295a53c9",
+      "platform": "",
+      "build_time": "2026-10-04T02:56:45Z",
+      "run_id": "37171180623"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "vllm",
+      "name": "vllm-openai",
+      "tag": "v0.31.0",
+      "platform": "",
+      "build_time": "2026-10-04T02:45:43Z",
+      "run_id": "37171180623"
     }
   ],
   "last_updated": "2026-09-14T09:59:54Z"
