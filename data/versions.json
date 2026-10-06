@@ -8225,6 +8225,24 @@
       "platform": "",
       "build_time": "2026-10-06T18:23:50Z",
       "run_id": "37475916759"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "embedding-gemma-2-day0-cu13",
+      "platform": "",
+      "build_time": "2026-10-06T20:31:59Z",
+      "run_id": "37524013379"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "embedding-gemma-2-dev-cu13",
+      "platform": "",
+      "build_time": "2026-10-06T20:31:59Z",
+      "run_id": "37524013379"
     }
   ],
   "last_updated": "2026-09-14T09:59:54Z"
