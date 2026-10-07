@@ -8243,6 +8243,24 @@
       "platform": "",
       "build_time": "2026-10-06T20:31:59Z",
       "run_id": "37524013379"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "nightly-dev-cu13-20261007-f1065423",
+      "platform": "",
+      "build_time": "2026-10-07T04:17:54Z",
+      "run_id": "37560794715"
+    },
+    {
+      "registry": "registry.cn-hangzhou.aliyuncs.com",
+      "namespace": "lmsysorg",
+      "name": "sglang",
+      "tag": "nightly-dev-20261007-f1065423",
+      "platform": "",
+      "build_time": "2026-10-07T04:17:54Z",
+      "run_id": "37560794715"
     }
   ],
   "last_updated": "2026-09-14T09:59:54Z"
